@@ -19,8 +19,16 @@ repositories {
     mavenCentral()
 }
 
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.ai:spring-ai-bom:1.0.0")
+    }
+}
+
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter")
+    implementation("org.springframework.ai:spring-ai-starter-mcp-server")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
