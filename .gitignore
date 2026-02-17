@@ -13,7 +13,7 @@ build/
 .settings
 .springBeans
 .sts4-cache
-bin/
+bin/web2md.jar
 !**/src/main/**/bin/
 !**/src/test/**/bin/
 

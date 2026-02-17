@@ -1,0 +1,32 @@
+{
+  "name": "web2md-mcp",
+  "version": "0.0.1",
+  "description": "MCP server that converts web pages to clean Markdown",
+  "bin": {
+    "web2md-mcp": "./bin/cli.js"
+  },
+  "scripts": {
+    "build": "./gradlew bootJar && cp build/libs/web2md-0.0.1-SNAPSHOT.jar bin/web2md.jar",
+    "prepublishOnly": "npm run build"
+  },
+  "files": [
+    "bin/"
+  ],
+  "keywords": [
+    "mcp",
+    "markdown",
+    "web",
+    "html-to-markdown",
+    "model-context-protocol",
+    "claude",
+    "ai"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kevstevie/web2md"
+  },
+  "engines": {
+    "node": ">=16"
+  }
+}
