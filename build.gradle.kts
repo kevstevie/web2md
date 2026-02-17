@@ -30,8 +30,11 @@ dependencies {
     implementation("org.springframework.ai:spring-ai-starter-mcp-server")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation("org.jsoup:jsoup:1.18.3")
+    implementation("com.vladsch.flexmark:flexmark-html2md-converter:0.64.8")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 

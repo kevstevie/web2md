@@ -8,17 +8,27 @@
 - **Framework**: Spring Boot 3.5
 - **MCP**: Spring AI 1.0.0 (`spring-ai-starter-mcp-server`)
 - **Transport**: STDIO (subprocess 방식)
+- **HTML Parsing**: Jsoup 1.18.3
+- **Markdown Conversion**: Flexmark 0.64.8 (`flexmark-html2md-converter`)
 - **Build**: Gradle (Kotlin DSL)
 
 ## 프로젝트 구조
 
 ```
 src/main/kotlin/org/jj/web2md/
-├── Web2mdApplication.kt      # Spring Boot 진입점
+├── Web2mdApplication.kt           # Spring Boot 진입점 (@ConfigurationPropertiesScan)
 ├── config/
-│   └── McpConfig.kt           # ToolCallbackProvider Bean 등록
-└── tool/
-    └── HelloTool.kt           # 샘플 MCP Tool (@Tool 어노테이션)
+│   ├── McpConfig.kt               # ToolCallbackProvider Bean 등록
+│   └── WebFetcherProperties.kt    # 설정 프로퍼티 (timeout, maxBodySize, userAgent)
+├── tool/
+│   ├── HelloTool.kt               # 샘플 MCP Tool
+│   └── WebToMarkdownTool.kt       # 웹→마크다운 변환 MCP Tool
+├── fetcher/
+│   └── HtmlFetcher.kt             # Jsoup URL fetch + URL 검증
+├── converter/
+│   └── HtmlToMarkdownConverter.kt # HTML 정리 + Markdown 변환
+└── exception/
+    └── Web2mdExceptions.kt        # InvalidUrlException, FetchFailedException
 ```
 
 ## 빌드 & 실행
