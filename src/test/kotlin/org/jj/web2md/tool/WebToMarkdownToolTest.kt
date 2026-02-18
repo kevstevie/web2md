@@ -4,6 +4,7 @@ import org.jj.web2md.converter.HtmlToMarkdownConverter
 import org.jj.web2md.exception.Web2mdException
 import org.jj.web2md.fetcher.JsHtmlFetcher
 import org.jj.web2md.fetcher.StaticHtmlFetcher
+import org.jj.web2md.service.MarkdownSummarizer
 import org.jsoup.Jsoup
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -25,6 +26,9 @@ class WebToMarkdownToolTest {
 
     @Mock
     private lateinit var htmlToMarkdownConverter: HtmlToMarkdownConverter
+
+    @Mock
+    private lateinit var markdownSummarizer: MarkdownSummarizer
 
     @InjectMocks
     private lateinit var tool: WebToMarkdownTool
@@ -100,5 +104,31 @@ class WebToMarkdownToolTest {
 
         assertTrue(result.startsWith("Error:"))
         assertContains(result, "unexpected error")
+    }
+
+    @Test
+    fun `should return summarized content when summarize is true`() {
+        val url = "https://example.com"
+        val doc = Jsoup.parse("<html><head><title>Example</title></head><body><p>Content</p></body></html>")
+        whenever(staticHtmlFetcher.fetch(url)).thenReturn(doc)
+        whenever(htmlToMarkdownConverter.convert(doc)).thenReturn("Content")
+        whenever(markdownSummarizer.summarize("# Example\n\nContent")).thenReturn("요약된 내용")
+
+        val result = tool.webToMarkdown(url, summarize = true)
+
+        assertContains(result, "요약된 내용")
+    }
+
+    @Test
+    fun `should return full markdown when summarize is false`() {
+        val url = "https://example.com"
+        val doc = Jsoup.parse("<html><head><title>Example</title></head><body><p>Full content here</p></body></html>")
+        whenever(staticHtmlFetcher.fetch(url)).thenReturn(doc)
+        whenever(htmlToMarkdownConverter.convert(doc)).thenReturn("Full content here")
+
+        val result = tool.webToMarkdown(url, summarize = false)
+
+        assertContains(result, "# Example")
+        assertContains(result, "Full content here")
     }
 }

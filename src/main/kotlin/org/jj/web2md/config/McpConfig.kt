@@ -10,9 +10,7 @@ import org.springframework.context.annotation.Configuration
 class McpConfig {
 
     @Bean
-    fun toolCallbackProvider(
-        webToMarkdownTool: WebToMarkdownTool
-    ): ToolCallbackProvider {
+    fun toolCallbackProvider(webToMarkdownTool: WebToMarkdownTool): ToolCallbackProvider {
         return MethodToolCallbackProvider.builder()
             .toolObjects(webToMarkdownTool)
             .build()
