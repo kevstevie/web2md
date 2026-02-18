@@ -39,7 +39,7 @@ cd web2md
 ### Run / 실행
 
 ```bash
-java -jar build/libs/web2md-0.0.1-SNAPSHOT.jar
+java -jar build/libs/web2md.jar
 ```
 
 The server runs in STDIO mode and communicates via JSON-RPC over stdin/stdout.
@@ -74,7 +74,7 @@ Add the following to your `claude_desktop_config.json`:
   "mcpServers": {
     "web2md": {
       "command": "java",
-      "args": ["-jar", "/absolute/path/to/web2md/build/libs/web2md-0.0.1-SNAPSHOT.jar"]
+      "args": ["-jar", "/absolute/path/to/web2md/build/libs/web2md.jar"]
     }
   }
 }
@@ -95,7 +95,7 @@ claude mcp add web2md -- npx -y web2md-mcp@latest
 **Via git clone:**
 
 ```bash
-claude mcp add web2md -- java -jar /absolute/path/to/web2md/build/libs/web2md-0.0.1-SNAPSHOT.jar
+claude mcp add web2md -- java -jar /absolute/path/to/web2md/build/libs/web2md.jar
 ```
 
 Or manually add to `.claude/settings.json`:
