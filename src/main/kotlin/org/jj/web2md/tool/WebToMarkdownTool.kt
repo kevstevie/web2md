@@ -2,7 +2,8 @@ package org.jj.web2md.tool
 
 import org.jj.web2md.converter.HtmlToMarkdownConverter
 import org.jj.web2md.exception.Web2mdException
-import org.jj.web2md.fetcher.HtmlFetcher
+import org.jj.web2md.fetcher.JsHtmlFetcher
+import org.jj.web2md.fetcher.StaticHtmlFetcher
 import org.slf4j.LoggerFactory
 import org.springframework.ai.tool.annotation.Tool
 import org.springframework.ai.tool.annotation.ToolParam
@@ -10,16 +11,21 @@ import org.springframework.stereotype.Service
 
 @Service
 class WebToMarkdownTool(
-    private val htmlFetcher: HtmlFetcher,
+    private val staticHtmlFetcher: StaticHtmlFetcher,
+    private val jsHtmlFetcher: JsHtmlFetcher,
     private val htmlToMarkdownConverter: HtmlToMarkdownConverter
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    @Tool(description = "Fetches a web page from the given URL and converts it to clean Markdown format. Supports only http/https URLs. Does not support JavaScript-rendered (SPA) pages.")
-    fun webToMarkdown(@ToolParam(description = "The URL of the web page to convert to Markdown") url: String): String {
+    @Tool(description = "Fetches a web page from the given URL and converts it to clean Markdown format. Supports http/https URLs. For JavaScript-rendered SPA pages (React, Vue, Angular, etc.), set jsEnabled to true.")
+    fun webToMarkdown(
+        @ToolParam(description = "The URL of the web page to convert to Markdown") url: String,
+        @ToolParam(description = "Set to true for JavaScript-rendered SPA pages. Default is false for faster static page fetching.") jsEnabled: Boolean = false
+    ): String {
         return try {
-            val document = htmlFetcher.fetch(url)
+            val fetcher = if (jsEnabled) jsHtmlFetcher else staticHtmlFetcher
+            val document = fetcher.fetch(url)
             val title = document.title()
             val markdown = htmlToMarkdownConverter.convert(document)
 

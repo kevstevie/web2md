@@ -4,35 +4,25 @@ An MCP (Model Context Protocol) server that converts web pages to clean Markdown
 
 MCP(Model Context Protocol) 서버로, 웹 페이지를 깨끗한 마크다운으로 변환합니다.
 
-## Features / 기능
+## Installation / 설치
 
-- **Web Page Fetching** - Fetches HTML from any public URL using Jsoup
-- **Smart Content Extraction** - Automatically finds the main content (`<main>`, `<article>`, `[role=main]`)
-- **HTML Cleanup** - Removes scripts, styles, nav, footer, ads, and other non-content elements
-- **Markdown Conversion** - Converts clean HTML to Markdown using Flexmark
-- **SSRF Protection** - Blocks requests to private/internal IP addresses (127.0.0.1, 10.x, 192.168.x, etc.)
-- **Configurable** - Timeout, max body size, and user agent are configurable via properties
+### Option 1: npm (Recommended / 추천)
 
----
+No build required. Just configure and use.
 
-- **웹 페이지 가져오기** - Jsoup을 사용하여 공개 URL에서 HTML을 가져옵니다
-- **스마트 본문 추출** - `<main>`, `<article>`, `[role=main]` 순으로 본문을 자동 감지합니다
-- **HTML 정리** - script, style, nav, footer, 광고 등 불필요한 요소를 제거합니다
-- **마크다운 변환** - Flexmark를 사용하여 정리된 HTML을 마크다운으로 변환합니다
-- **SSRF 방어** - 사설/내부 IP(127.0.0.1, 10.x, 192.168.x 등)로의 요청을 차단합니다
-- **설정 가능** - timeout, 최대 본문 크기, user agent를 프로퍼티로 설정할 수 있습니다
+빌드 없이 바로 사용할 수 있습니다.
 
-## Tech Stack / 기술 스택
+```bash
+npm install -g web2md-mcp
+```
 
-| Component | Technology |
-|-----------|------------|
-| Language | Kotlin 1.9 / Java 17 |
-| Framework | Spring Boot 3.5 |
-| MCP | Spring AI 1.0.0 (`spring-ai-starter-mcp-server`) |
-| Transport | STDIO |
-| HTML Parsing | Jsoup 1.18.3 |
-| Markdown Conversion | Flexmark 0.64.8 |
-| Build | Gradle (Kotlin DSL) |
+### Option 2: Build from source / 소스에서 빌드
+
+```bash
+git clone https://github.com/kevstevie/web2md.git
+cd web2md
+./gradlew bootJar
+```
 
 ## Getting Started / 시작하기
 
@@ -55,26 +45,6 @@ java -jar build/libs/web2md-0.0.1-SNAPSHOT.jar
 The server runs in STDIO mode and communicates via JSON-RPC over stdin/stdout.
 
 서버는 STDIO 모드로 실행되며, stdin/stdout을 통해 JSON-RPC로 통신합니다.
-
-## Installation / 설치
-
-### Option 1: npm (Recommended / 추천)
-
-No build required. Just configure and use.
-
-빌드 없이 바로 사용할 수 있습니다.
-
-```bash
-npm install -g web2md-mcp
-```
-
-### Option 2: Build from source / 소스에서 빌드
-
-```bash
-git clone https://github.com/kevstevie/web2md.git
-cd web2md
-./gradlew bootJar
-```
 
 ## MCP Client Configuration / MCP 클라이언트 설정
 
@@ -143,6 +113,39 @@ Or manually add to `.claude/settings.json`:
 }
 ```
 
+## Features / 기능
+
+- **Web Page Fetching** - Fetches HTML from any public URL using Jsoup
+- **JavaScript Support** - Renders JavaScript-heavy pages (React, Vue, Angular, etc.) using HtmlUnit
+- **Smart Content Extraction** - Automatically finds the main content (`<main>`, `<article>`, `[role=main]`)
+- **HTML Cleanup** - Removes scripts, styles, nav, footer, ads, and other non-content elements
+- **Markdown Conversion** - Converts clean HTML to Markdown using Flexmark
+- **SSRF Protection** - Blocks requests to private/internal IP addresses (127.0.0.1, 10.x, 192.168.x, etc.)
+- **Configurable** - Timeout, max body size, and user agent are configurable via properties
+
+---
+
+- **웹 페이지 가져오기** - Jsoup을 사용하여 공개 URL에서 HTML을 가져옵니다
+- **JavaScript 지원** - HtmlUnit을 사용하여 JS로 렌더링되는 페이지(React, Vue, Angular 등)를 처리합니다
+- **스마트 본문 추출** - `<main>`, `<article>`, `[role=main]` 순으로 본문을 자동 감지합니다
+- **HTML 정리** - script, style, nav, footer, 광고 등 불필요한 요소를 제거합니다
+- **마크다운 변환** - Flexmark를 사용하여 정리된 HTML을 마크다운으로 변환합니다
+- **SSRF 방어** - 사설/내부 IP(127.0.0.1, 10.x, 192.168.x 등)로의 요청을 차단합니다
+- **설정 가능** - timeout, 최대 본문 크기, user agent를 프로퍼티로 설정할 수 있습니다
+
+## Tech Stack / 기술 스택
+
+| Component | Technology |
+|-----------|------------|
+| Language | Kotlin 1.9 / Java 17 |
+| Framework | Spring Boot 3.5 |
+| MCP | Spring AI 1.0.0 (`spring-ai-starter-mcp-server`) |
+| Transport | STDIO |
+| HTML Parsing | Jsoup 1.18.3 |
+| JS Rendering | HtmlUnit 4.21.0 |
+| Markdown Conversion | Flexmark 0.64.8 |
+| Build | Gradle (Kotlin DSL) |
+
 ## Available Tools / 사용 가능한 도구
 
 ### `webToMarkdown`
@@ -151,9 +154,10 @@ Fetches a web page and converts it to Markdown.
 
 웹 페이지를 가져와서 마크다운으로 변환합니다.
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `url` | `String` | The URL of the web page to convert (http/https only) |
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `url` | `String` | - | The URL of the web page to convert (http/https only) |
+| `jsEnabled` | `Boolean` | `false` | Set to `true` for JavaScript-rendered SPA pages |
 
 **Example response / 응답 예시:**
 
@@ -177,6 +181,7 @@ Configurable via `application.properties`:
 | `web2md.fetcher.timeout-millis` | `10000` | HTTP request timeout (ms) |
 | `web2md.fetcher.max-body-size-bytes` | `5242880` | Max response body size (5MB) |
 | `web2md.fetcher.user-agent` | `Mozilla/5.0 (compatible; web2md/1.0)` | User-Agent header |
+| `web2md.fetcher.js.wait-millis` | `3000` | Max wait time for JS execution (ms) |
 
 ## Project Structure / 프로젝트 구조
 
@@ -189,7 +194,9 @@ src/main/kotlin/org/jj/web2md/
 ├── tool/
 │   └── WebToMarkdownTool.kt       # MCP tool implementation / MCP 도구 구현
 ├── fetcher/
-│   └── HtmlFetcher.kt             # URL validation + HTML fetch / URL 검증 + HTML 가져오기
+│   ├── HtmlFetcherStrategy.kt     # Fetcher interface / Fetcher 인터페이스
+│   ├── StaticHtmlFetcher.kt       # Jsoup-based static fetcher / 정적 페이지 fetcher
+│   └── JsHtmlFetcher.kt           # HtmlUnit-based JS fetcher / JS 렌더링 fetcher
 ├── converter/
 │   └── HtmlToMarkdownConverter.kt # HTML cleanup + Markdown conversion / HTML 정리 + 변환
 └── exception/
@@ -198,10 +205,10 @@ src/main/kotlin/org/jj/web2md/
 
 ## Limitations / 제한사항
 
-- Does not support JavaScript-rendered pages (SPA). Only server-side HTML is processed.
+- JavaScript support via HtmlUnit uses the Rhino engine, which may not handle modern ES6+ module-based SPAs (e.g., Vite builds) correctly.
 - Maximum body size is 5MB by default.
 
 ---
 
-- JavaScript로 렌더링되는 페이지(SPA)는 지원하지 않습니다. 서버사이드 HTML만 처리합니다.
+- HtmlUnit의 JS 지원은 Rhino 엔진 기반으로, 최신 ES6+ 모듈 방식의 SPA(Vite 빌드 결과물 등)는 정상적으로 동작하지 않을 수 있습니다.
 - 기본 최대 본문 크기는 5MB입니다.
