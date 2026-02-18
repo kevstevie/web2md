@@ -12,7 +12,7 @@ import kotlin.test.assertTrue
 class HtmlFetcherTest {
 
     private val properties = WebFetcherProperties()
-    private val fetcher = HtmlFetcher(properties)
+    private val fetcher = StaticHtmlFetcher(properties)
 
     @ParameterizedTest
     @ValueSource(strings = ["ftp://example.com", "file:///etc/passwd", "javascript:alert(1)", "data:text/html,<h1>hi</h1>"])
@@ -86,7 +86,7 @@ class HtmlFetcherTest {
             maxBodySizeBytes = 1024,
             userAgent = "CustomBot/1.0"
         )
-        val customFetcher = HtmlFetcher(customProperties)
+        StaticHtmlFetcher(customProperties)
         // Verify it constructs without error
         assertEquals(5000, customProperties.timeoutMillis)
         assertEquals(1024, customProperties.maxBodySizeBytes)

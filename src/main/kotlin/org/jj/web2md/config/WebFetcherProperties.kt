@@ -6,5 +6,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 data class WebFetcherProperties(
     val timeoutMillis: Int = 10_000,
     val maxBodySizeBytes: Int = 5 * 1024 * 1024,
-    val userAgent: String = "Mozilla/5.0 (compatible; web2md/1.0)"
-)
+    val userAgent: String = "Mozilla/5.0 (compatible; web2md/1.0)",
+    val js: JsConfig = JsConfig()
+) {
+    data class JsConfig(
+        val waitMillis: Int = 3_000
+    )
+}
