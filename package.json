@@ -6,7 +6,7 @@
     "web2md-mcp": "./bin/cli.js"
   },
   "scripts": {
-    "build": "./gradlew bootJar && cp build/libs/web2md-0.0.1-SNAPSHOT.jar bin/web2md.jar",
+    "build": "./gradlew bootJar && find build/libs -name '*.jar' ! -name '*-plain.jar' -exec cp {} bin/web2md.jar \\;",
     "prepublishOnly": "npm run build"
   },
   "files": [
