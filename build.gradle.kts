@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "org.jj"
-version = "0.0.1-SNAPSHOT"
+version = "0.0.2-SNAPSHOT"
 description = "web2md"
 
 java {
