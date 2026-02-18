@@ -61,7 +61,7 @@ Add the following to your `claude_desktop_config.json`:
   "mcpServers": {
     "web2md": {
       "command": "npx",
-      "args": ["-y", "web2md-mcp"]
+      "args": ["-y", "web2md-mcp@latest"]
     }
   }
 }
@@ -89,7 +89,7 @@ Run one of the following commands in your terminal:
 **Via npm:**
 
 ```bash
-claude mcp add web2md -- npx -y web2md-mcp
+claude mcp add web2md -- npx -y web2md-mcp@latest
 ```
 
 **Via git clone:**
@@ -107,7 +107,7 @@ Or manually add to `.claude/settings.json`:
   "mcpServers": {
     "web2md": {
       "command": "npx",
-      "args": ["-y", "web2md-mcp"]
+      "args": ["-y", "web2md-mcp@latest"]
     }
   }
 }
