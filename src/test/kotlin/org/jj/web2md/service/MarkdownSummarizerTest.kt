@@ -97,7 +97,7 @@ class MarkdownSummarizerTest {
     }
 
     @Test
-    fun `should respect maxChars limit`() {
+    fun `should produce shorter output at lower level`() {
         val longMarkdown = (1..50).joinToString("\n\n") { i ->
             "## Section $i\nThis is a long paragraph for section $i with enough text to fill space properly."
         }
@@ -106,9 +106,24 @@ class MarkdownSummarizerTest {
             list.indices.toList()
         }
 
-        val result = summarizer.summarize(longMarkdown, maxChars = 500)
+        val briefResult = summarizer.summarize(longMarkdown, level = 1)
+        val detailedResult = summarizer.summarize(longMarkdown, level = 5)
 
-        assertTrue(result.length <= 500)
+        assertTrue(briefResult.length <= 1000)
+        assertTrue(briefResult.length < detailedResult.length)
+    }
+
+    @Test
+    fun `should use default level 3 when no level is specified`() {
+        val markdown = """
+            # Title
+            This is a sample sentence for testing. Another sentence follows here. Third sentence is also present.
+        """.trimIndent()
+        setupRankReturnAll(emptyList())
+
+        val result = summarizer.summarize(markdown)
+
+        assertTrue(result.isNotEmpty())
     }
 
     @Test

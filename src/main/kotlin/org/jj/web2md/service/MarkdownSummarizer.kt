@@ -6,8 +6,6 @@ import org.springframework.stereotype.Service
 class MarkdownSummarizer(private val textRankSummarizer: TextRankSummarizer) {
 
     companion object {
-        private const val DEFAULT_MAX_CHARS = 3000
-        private const val TOP_PERCENT = 35
         private const val MIN_SUMMARY_SENTENCES = 3
         private const val MIN_SENTENCE_LENGTH = 15
         private val CODE_BLOCK = Regex("```[\\s\\S]*?```")
@@ -15,9 +13,28 @@ class MarkdownSummarizer(private val textRankSummarizer: TextRankSummarizer) {
         private val HEADING = Regex("^#{1,6}\\s+.+")
         private val LIST_ITEM = Regex("^\\s*[-*+]\\s+.+|^\\s*\\d+\\.\\s+.+")
         private val SENTENCE_BOUNDARY = Regex("(?<=[.!?。？！]\\s?)(?=\\S)")
+
+        private fun levelToMaxChars(level: Int): Int = when (level.coerceIn(1, 5)) {
+            1 -> 1000
+            2 -> 2000
+            3 -> 3000
+            4 -> 5000
+            else -> 8000
+        }
+
+        private fun levelToTopPercent(level: Int): Int = when (level.coerceIn(1, 5)) {
+            1 -> 15
+            2 -> 25
+            3 -> 35
+            4 -> 50
+            else -> 70
+        }
     }
 
-    fun summarize(markdown: String, maxChars: Int = DEFAULT_MAX_CHARS): String {
+    fun summarize(markdown: String, level: Int = 3): String {
+        val maxChars = levelToMaxChars(level)
+        val topPercent = levelToTopPercent(level)
+
         val cleaned = CODE_BLOCK.replace(markdown, "")
         val sections = parseSections(cleaned.lines())
 
@@ -29,7 +46,7 @@ class MarkdownSummarizer(private val textRankSummarizer: TextRankSummarizer) {
         if (indexed.isEmpty()) return buildStructureOnly(sections, maxChars)
 
         // 전역 TextRank로 중요 문장 선별
-        val topK = maxOf(MIN_SUMMARY_SENTENCES, indexed.size * TOP_PERCENT / 100)
+        val topK = maxOf(MIN_SUMMARY_SENTENCES, indexed.size * topPercent / 100)
         val importantTexts = textRankSummarizer.rank(indexed.map { it.second })
             .take(topK)
             .map { indexed[it].second }
