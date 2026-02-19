@@ -66,3 +66,7 @@ class MyTool {
 - 커밋 메시지: `<type>: <description>` (feat, fix, refactor, docs, test, chore)
 - 불변성 패턴 사용
 - 파일당 800줄 이하, 함수당 50줄 이하
+
+## 문서 관리
+
+- 프로젝트 변경시 README.md를 같이 수정한다.

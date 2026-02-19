@@ -17,6 +17,7 @@ java {
 
 repositories {
     mavenCentral()
+    maven { url = uri("https://jitpack.io") }
 }
 
 dependencyManagement {
@@ -33,6 +34,7 @@ dependencies {
     implementation("org.jsoup:jsoup:1.18.3")
     implementation("com.vladsch.flexmark:flexmark-html2md-converter:0.64.8")
     implementation("org.htmlunit:htmlunit:4.21.0")
+    implementation("com.github.shin285:KOMORAN:3.3.9")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
@@ -47,4 +49,8 @@ kotlin {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+tasks.bootJar {
+    archiveFileName = "web2md.jar"
 }

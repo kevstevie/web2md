@@ -4,6 +4,7 @@ import org.jj.web2md.converter.HtmlToMarkdownConverter
 import org.jj.web2md.exception.Web2mdException
 import org.jj.web2md.fetcher.JsHtmlFetcher
 import org.jj.web2md.fetcher.StaticHtmlFetcher
+import org.jj.web2md.service.MarkdownSummarizer
 import org.jsoup.Jsoup
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -25,6 +26,9 @@ class WebToMarkdownToolTest {
 
     @Mock
     private lateinit var htmlToMarkdownConverter: HtmlToMarkdownConverter
+
+    @Mock
+    private lateinit var markdownSummarizer: MarkdownSummarizer
 
     @InjectMocks
     private lateinit var tool: WebToMarkdownTool
@@ -100,5 +104,44 @@ class WebToMarkdownToolTest {
 
         assertTrue(result.startsWith("Error:"))
         assertContains(result, "unexpected error")
+    }
+
+    @Test
+    fun `should return summarized content when summaryLevel is provided`() {
+        val url = "https://example.com"
+        val doc = Jsoup.parse("<html><head><title>Example</title></head><body><p>Content</p></body></html>")
+        whenever(staticHtmlFetcher.fetch(url)).thenReturn(doc)
+        whenever(htmlToMarkdownConverter.convert(doc)).thenReturn("Content")
+        whenever(markdownSummarizer.summarize("# Example\n\nContent", 3)).thenReturn("요약된 내용")
+
+        val result = tool.webToMarkdown(url, summaryLevel = 3)
+
+        assertContains(result, "요약된 내용")
+    }
+
+    @Test
+    fun `should return full markdown when summaryLevel is null`() {
+        val url = "https://example.com"
+        val doc = Jsoup.parse("<html><head><title>Example</title></head><body><p>Full content here</p></body></html>")
+        whenever(staticHtmlFetcher.fetch(url)).thenReturn(doc)
+        whenever(htmlToMarkdownConverter.convert(doc)).thenReturn("Full content here")
+
+        val result = tool.webToMarkdown(url, summaryLevel = null)
+
+        assertContains(result, "# Example")
+        assertContains(result, "Full content here")
+    }
+
+    @Test
+    fun `should pass summaryLevel to summarizer`() {
+        val url = "https://example.com"
+        val doc = Jsoup.parse("<html><head><title>Test</title></head><body><p>Brief</p></body></html>")
+        whenever(staticHtmlFetcher.fetch(url)).thenReturn(doc)
+        whenever(htmlToMarkdownConverter.convert(doc)).thenReturn("Brief")
+        whenever(markdownSummarizer.summarize("# Test\n\nBrief", 1)).thenReturn("매우 간결한 요약")
+
+        val result = tool.webToMarkdown(url, summaryLevel = 1)
+
+        assertContains(result, "매우 간결한 요약")
     }
 }
