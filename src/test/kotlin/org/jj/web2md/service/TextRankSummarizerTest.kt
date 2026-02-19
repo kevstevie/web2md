@@ -1,5 +1,6 @@
 package org.jj.web2md.service
 
+import org.jj.web2md.service.tokenizer.KoreanTokenizer
 import org.jj.web2md.service.tokenizer.SimpleTokenizer
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
@@ -56,5 +57,22 @@ class TextRankSummarizerTest {
         val result = summarizer.rank(sentences)
         assertEquals(3, result.size)
         assertEquals(setOf(0, 1, 2), result.toSet())
+    }
+
+    @Test
+    fun `should rank Korean sentences by topic relevance`() {
+        val koreanSummarizer = TextRankSummarizer(KoreanTokenizer())
+        val sentences = listOf(
+            "인공지능은 현대 기술의 핵심 분야이다.",        // 핵심 주제
+            "인공지능과 머신러닝은 데이터를 기반으로 학습한다.", // 핵심 주제
+            "딥러닝 모델은 인공지능 발전을 이끌고 있다.",     // 핵심 주제
+            "오늘 날씨가 맑고 화창하다."                  // 무관한 문장
+        )
+
+        val ranked = koreanSummarizer.rank(sentences)
+
+        val weatherIndex = ranked.indexOf(3)
+        val aiIndices = listOf(0, 1, 2).map { ranked.indexOf(it) }
+        assertTrue(aiIndices.all { it < weatherIndex }, "인공지능 관련 문장이 날씨 문장보다 높은 순위여야 합니다")
     }
 }

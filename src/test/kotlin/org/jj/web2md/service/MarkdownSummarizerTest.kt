@@ -108,7 +108,7 @@ class MarkdownSummarizerTest {
 
         val result = summarizer.summarize(longMarkdown, maxChars = 500)
 
-        assertTrue(result.length <= 600)
+        assertTrue(result.length <= 500)
     }
 
     @Test
