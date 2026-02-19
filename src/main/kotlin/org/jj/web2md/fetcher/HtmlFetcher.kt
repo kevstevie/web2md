@@ -9,13 +9,11 @@ import org.springframework.stereotype.Service
 @Service
 class StaticHtmlFetcher(private val properties: WebFetcherProperties) : HtmlFetcherStrategy {
 
-    override fun fetch(url: String): Document = fetchWithUserAgent(url, properties.userAgent)
-
-    fun fetchWithUserAgent(url: String, userAgent: String): Document {
+    override fun fetch(url: String): Document {
         validateUrl(url)
         try {
             return Jsoup.connect(url)
-                .userAgent(userAgent)
+                .userAgent(properties.userAgent)
                 .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
                 .header("Accept-Language", "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7")
                 .header("Accept-Encoding", "gzip")

@@ -132,7 +132,6 @@ Or manually add to `.claude/settings.json`:
 ## Features / 기능
 
 - **Web Page Fetching** - Fetches HTML from any public URL using Jsoup with browser-like headers
-- **Googlebot UA Fallback** - Automatically retries with Googlebot User-Agent when content is empty, enabling SSR responses from Prerender-enabled sites
 - **JavaScript Support** - Renders JavaScript-heavy pages (React, Vue, Angular, etc.) using HtmlUnit with 2-phase async wait
 - **Smart Content Extraction** - Automatically finds the main content (`<main>`, `<article>`, `[role=main]`)
 - **HTML Cleanup** - Removes scripts, styles, nav, footer, ads, and other non-content elements
@@ -144,7 +143,6 @@ Or manually add to `.claude/settings.json`:
 ---
 
 - **웹 페이지 가져오기** - 브라우저와 유사한 헤더로 Jsoup을 사용하여 공개 URL에서 HTML을 가져옵니다
-- **Googlebot UA 자동 폴백** - 내용이 비어있을 경우 Googlebot User-Agent로 자동 재시도하여 Prerender 지원 사이트에서 SSR 응답 수신
 - **JavaScript 지원** - HtmlUnit을 사용하여 JS로 렌더링되는 페이지(React, Vue, Angular 등)를 2단계 대기 전략으로 처리합니다
 - **스마트 본문 추출** - `<main>`, `<article>`, `[role=main]` 순으로 본문을 자동 감지합니다
 - **HTML 정리** - script, style, nav, footer, 광고 등 불필요한 요소를 제거합니다
@@ -256,10 +254,10 @@ src/main/kotlin/org/jj/web2md/
 
 ## Limitations / 제한사항
 
-- JavaScript support via HtmlUnit uses the Rhino engine, which may not handle modern ES6+ module-based SPAs (e.g., Vite builds) correctly. For SSR-enabled sites (Next.js, Nuxt, etc.), the Googlebot UA fallback handles most cases without JS rendering.
+- JavaScript support via HtmlUnit uses the Rhino engine, which may not handle modern ES6+ module-based SPAs (e.g., Vite builds) correctly.
 - Maximum body size is 5MB by default.
 
 ---
 
-- HtmlUnit의 JS 지원은 Rhino 엔진 기반으로, 최신 ES6+ 모듈 방식의 SPA(Vite 빌드 결과물 등)는 정상적으로 동작하지 않을 수 있습니다. SSR을 지원하는 사이트(Next.js, Nuxt 등)는 Googlebot UA 폴백으로 대부분 처리됩니다.
+- HtmlUnit의 JS 지원은 Rhino 엔진 기반으로, 최신 ES6+ 모듈 방식의 SPA(Vite 빌드 결과물 등)는 정상적으로 동작하지 않을 수 있습니다.
 - 기본 최대 본문 크기는 5MB입니다.
