@@ -14,7 +14,7 @@ class MarkdownSummarizer(private val textRankSummarizer: TextRankSummarizer) {
         private val INLINE_CODE = Regex("`[^`]+`")
         private val HEADING = Regex("^#{1,6}\\s+.+")
         private val LIST_ITEM = Regex("^\\s*[-*+]\\s+.+|^\\s*\\d+\\.\\s+.+")
-        private val SENTENCE_BOUNDARY = Regex("(?<=[.!?。]\\s{0,1})(?=\\S)")
+        private val SENTENCE_BOUNDARY = Regex("(?<=[.!?。？！]\\s?)(?=\\S)")
     }
 
     fun summarize(markdown: String, maxChars: Int = DEFAULT_MAX_CHARS): String {
@@ -83,9 +83,9 @@ class MarkdownSummarizer(private val textRankSummarizer: TextRankSummarizer) {
         maxChars: Int
     ): String {
         val result = StringBuilder()
-        sections.forEachIndexed { sIdx, section ->
+        for ((sIdx, section) in sections.withIndex()) {
             val chunk = renderSection(section, importantBySect[sIdx] ?: emptyList())
-            if (result.length + chunk.length > maxChars) return@forEachIndexed
+            if (result.length + chunk.length > maxChars) break
             result.append(chunk)
         }
         return result.toString().trim()
