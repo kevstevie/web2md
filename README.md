@@ -4,6 +4,22 @@ An MCP (Model Context Protocol) server that converts web pages to clean Markdown
 
 MCP(Model Context Protocol) 서버로, 웹 페이지를 깨끗한 마크다운으로 변환합니다.
 
+---
+
+## Why Markdown? / 마크다운을 사용하는 이유
+
+> **LLM Token Savings** — Raw HTML is bloated with tags, scripts, and boilerplate that waste context.
+> web2md strips all of that and returns only clean Markdown, drastically reducing the token count fed to your LLM.
+> With the optional `summaryLevel` parameter, you can get an extractive summary instead of the full page,
+> cutting token usage even further when only an overview is needed.
+
+> **LLM 토큰 절감** — 원본 HTML에는 태그, 스크립트, 불필요한 보일러플레이트가 가득해 컨텍스트 낭비가 큽니다.
+> web2md는 이를 모두 제거하고 깨끗한 마크다운만 반환해 LLM에 전달되는 토큰 수를 대폭 줄입니다.
+> 선택적인 `summaryLevel` 파라미터를 사용하면 전체 내용 대신 추출 요약본을 받아
+> 개요만 필요한 경우 토큰 사용량을 더욱 줄일 수 있습니다.
+
+---
+
 ## Installation / 설치
 
 ### Option 1: npm (Recommended / 추천)
@@ -154,15 +170,26 @@ Or manually add to `.claude/settings.json`:
 
 ### `webToMarkdown`
 
-Fetches a web page and converts it to Markdown. Use `summarize=true` when only an overview is needed to reduce context size.
+Fetches a web page and converts it to Markdown.
+Use `summaryLevel` to get an extractive summary instead of the full page — ideal for reducing LLM token usage when only an overview is needed.
 
-웹 페이지를 가져와서 마크다운으로 변환합니다. 개요만 필요할 때는 `summarize=true`로 컨텍스트 크기를 줄일 수 있습니다.
+웹 페이지를 가져와서 마크다운으로 변환합니다.
+전체 내용 대신 추출 요약이 필요할 때는 `summaryLevel`을 설정하세요 — LLM 토큰 사용량을 줄이는 데 효과적입니다.
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `url` | `String` | - | The URL of the web page to fetch (http/https only) |
 | `jsEnabled` | `Boolean` | `false` | Set to `true` for JavaScript-rendered SPA pages |
-| `summarize` | `Boolean` | `false` | Set to `true` to return an extractive summary instead of full Markdown |
+| `summaryLevel` | `Int?` | `null` | Summary level: `1` (most concise) to `5` (most detailed). Omit for full content. |
+
+**Token usage guide / 토큰 사용량 가이드:**
+
+| Mode | `summaryLevel` | Token Usage |
+|------|---------------|-------------|
+| Full Markdown | `null` | Standard (HTML → clean MD) |
+| Brief summary | `1` | Minimum (~10–20% of full) |
+| Balanced summary | `3` | Moderate (~30–50% of full) |
+| Detailed summary | `5` | Extended (~60–80% of full) |
 
 **Example: full content / 전체 내용:**
 
@@ -175,7 +202,7 @@ You may use this domain in literature without prior coordination or asking for p
 [More information...](https://www.iana.org/domains/example)
 ```
 
-**Example: summarized (`summarize=true`) / 요약 (`summarize=true`):**
+**Example: summarized (`summaryLevel=1`) / 요약 (`summaryLevel=1`):**
 
 ```markdown
 # Example Domain
@@ -216,7 +243,7 @@ src/main/kotlin/org/jj/web2md/
 │       └── KoreanTokenizer.kt     # Korean morphological analyzer (Komoran) / 한국어 형태소 분석
 ├── fetcher/
 │   ├── HtmlFetcherStrategy.kt     # Fetcher interface / Fetcher 인터페이스
-│   ├── StaticHtmlFetcher.kt       # Jsoup-based static fetcher / 정적 페이지 fetcher
+│   ├── HtmlFetcher.kt             # Jsoup-based static fetcher / 정적 페이지 fetcher
 │   └── JsHtmlFetcher.kt           # HtmlUnit-based JS fetcher / JS 렌더링 fetcher
 ├── converter/
 │   └── HtmlToMarkdownConverter.kt # HTML cleanup + Markdown conversion / HTML 정리 + 변환
