@@ -17,6 +17,7 @@ class HtmlToMarkdownConverter {
         private val CONTENT_SELECTORS = listOf("main", "article", "[role=main]", "body")
         private val CONSECUTIVE_BLANK_LINES = Regex("\n{3,}")
         private val TRAILING_WHITESPACE = Regex("[ \t]+\n")
+        private val BASE64_IMAGE = Regex("!\\[[^]]*]\\(data:[^)]*\\)")
     }
 
     fun convert(document: Document): String {
@@ -32,6 +33,7 @@ class HtmlToMarkdownConverter {
         }
         document.select("[aria-hidden=true]").remove()
         document.select(".ad, .ads, .advertisement, .sidebar, .popup, .modal, .cookie-banner").remove()
+        document.select("img[src^=data:]").remove()
         return document
     }
 
@@ -47,6 +49,7 @@ class HtmlToMarkdownConverter {
 
     private fun postProcess(markdown: String): String {
         return markdown
+            .replace(BASE64_IMAGE, "")
             .replace(TRAILING_WHITESPACE, "\n")
             .replace(CONSECUTIVE_BLANK_LINES, "\n\n")
             .trim()
