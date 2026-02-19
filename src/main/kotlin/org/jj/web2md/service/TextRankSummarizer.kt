@@ -11,6 +11,7 @@ class TextRankSummarizer(private val tokenizer: Tokenizer) {
     companion object {
         private const val DAMPING = 0.85
         private const val ITERATIONS = 30
+        private const val CONVERGENCE_THRESHOLD = 0.0001
     }
 
     /**
@@ -22,7 +23,7 @@ class TextRankSummarizer(private val tokenizer: Tokenizer) {
 
         val tokenized = sentences.map { tokenizer.tokenize(it) }
         val tfidfVectors = buildTfIdf(tokenized)
-        val simMatrix = buildSimilarityMatrix(tfidfVectors, sentences.size)
+        val simMatrix = buildSimilarityMatrix(tfidfVectors)
         val scores = textRank(simMatrix, sentences.size)
 
         return scores.indices.sortedByDescending { scores[it] }
@@ -42,14 +43,15 @@ class TextRankSummarizer(private val tokenizer: Tokenizer) {
             val tf = mutableMapOf<String, Double>()
             tokens.forEach { tf[it] = (tf[it] ?: 0.0) + 1.0 }
             tf.mapValues { (token, freq) ->
-                (freq / tokens.size) * ln((n + 1.0) / ((df[token] ?: 0) + 1.0))
+                (freq / tokens.size) * (ln((n + 1.0) / ((df[token] ?: 0) + 1.0)) + 1.0)
             }
         }
     }
 
     // ---- 코사인 유사도 ----
 
-    private fun buildSimilarityMatrix(vectors: List<Map<String, Double>>, n: Int): Array<DoubleArray> {
+    private fun buildSimilarityMatrix(vectors: List<Map<String, Double>>): Array<DoubleArray> {
+        val n = vectors.size
         val matrix = Array(n) { DoubleArray(n) }
         for (i in 0 until n) {
             for (j in i + 1 until n) {
@@ -84,7 +86,9 @@ class TextRankSummarizer(private val tokenizer: Tokenizer) {
                 }
                 next[i] = (1 - DAMPING) / n + DAMPING * sum
             }
+            val delta = next.indices.sumOf { i -> Math.abs(next[i] - scores[i]) }
             scores = next
+            if (delta < CONVERGENCE_THRESHOLD) return scores
         }
         return scores
     }
