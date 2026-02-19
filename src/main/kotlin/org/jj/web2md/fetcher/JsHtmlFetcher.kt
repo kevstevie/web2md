@@ -32,7 +32,10 @@ class JsHtmlFetcher(private val properties: WebFetcherProperties) : HtmlFetcherS
                     timeout = properties.timeoutMillis
                 }
                 val page: HtmlPage = client.getPage(url)
+                // 1단계: 초기 JS 실행 및 페이지 로드 대기
                 client.waitForBackgroundJavaScript(properties.js.waitMillis.toLong())
+                // 2단계: 초기 JS가 트리거한 추가 비동기 작업(API 호출 등) 대기
+                client.waitForBackgroundJavaScriptStartingBefore(properties.js.additionalWaitMillis.toLong())
                 return Jsoup.parse(page.asXml(), url)
             }
         } catch (e: Web2mdException) {

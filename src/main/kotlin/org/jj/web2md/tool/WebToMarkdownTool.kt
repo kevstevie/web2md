@@ -20,18 +20,31 @@ class WebToMarkdownTool(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    @Tool(description = "Fetches a web page from the given URL and converts it to Markdown. Omit summaryLevel for full content. Set summaryLevel 1-5 for an extractive summary (1=most concise, 5=most detailed).")
+    companion object {
+        private const val GOOGLEBOT_UA = "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
+        private const val MIN_CONTENT_LENGTH = 200
+    }
+
+    @Tool(description = "Fetches a web page from the given URL and converts it to Markdown. For full content, omit summaryLevel. For an extractive summary, set summaryLevel to an integer 1-5 (1=most concise, 5=most detailed). Do not pass null as a value.")
     fun webToMarkdown(
         @ToolParam(description = "The URL of the web page to fetch") url: String,
         @ToolParam(description = "Set to true for JavaScript-rendered SPA pages (React, Vue, Angular, etc.). Default is false.") jsEnabled: Boolean = false,
-        @ToolParam(description = "Summary level from 1 (most concise) to 5 (most detailed). Omit or set to null for full content without summarization.") summaryLevel: Int? = null
+        @ToolParam(description = "Integer 1-5 for extractive summary. 1=most concise, 5=most detailed. Omit this parameter entirely for full content.") summaryLevel: Int? = null
     ): String {
         return try {
             val fetcher = if (jsEnabled) jsHtmlFetcher else staticHtmlFetcher
             val document = fetcher.fetch(url)
-            val title = document.title()
             val markdown = htmlToMarkdownConverter.convert(document)
-            val fullMarkdown = if (title.isNotBlank()) "# $title\n\n$markdown" else markdown
+
+            logger.info("[web2md] html title='{}' markdown.length={}", document.title(), markdown.length)
+
+            val fullMarkdown = if (markdown.length < MIN_CONTENT_LENGTH) {
+                logger.info("[web2md] Content too short, retrying with Googlebot UA")
+                fetchWithGooglebotFallback(url, document.title())
+            } else {
+                val title = document.title()
+                if (title.isNotBlank()) "# $title\n\n$markdown" else markdown
+            }
 
             if (summaryLevel != null) markdownSummarizer.summarize(fullMarkdown, summaryLevel) else fullMarkdown
         } catch (e: Web2mdException.InvalidUrlException) {
@@ -43,6 +56,18 @@ class WebToMarkdownTool(
         } catch (e: Exception) {
             logger.error("Unexpected error processing URL: {}", url, e)
             "Error: An unexpected error occurred while processing the request."
+        }
+    }
+
+    private fun fetchWithGooglebotFallback(url: String, originalTitle: String): String {
+        return try {
+            val document = staticHtmlFetcher.fetchWithUserAgent(url, GOOGLEBOT_UA)
+            val markdown = htmlToMarkdownConverter.convert(document)
+            val title = document.title().ifBlank { originalTitle }
+            if (title.isNotBlank()) "# $title\n\n$markdown" else markdown
+        } catch (e: Exception) {
+            logger.debug("Googlebot UA fallback failed for: {}", url, e)
+            if (originalTitle.isNotBlank()) "# $originalTitle\n\n" else ""
         }
     }
 }
