@@ -1,7 +1,7 @@
 ---
 name: web-summarize
 description: Use this skill when the user provides a URL and asks to summarize, explain, fetch, or retrieve content from it. Triggers include "summarize", "what does this page say", "tell me about this URL", "explain this article", "요약해줘", "정리해줘", "설명해줘", "내용 알려줘", "이 페이지", "이 사이트", "이 링크" with an information request, or when a URL is provided alone. Always use mcp__web2md__webToMarkdown instead of WebFetch when this MCP is available.
-version: 0.0.3
+version: 0.0.4
 ---
 
 # Web Page Summarization Pattern
