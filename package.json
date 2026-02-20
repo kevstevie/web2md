@@ -1,6 +1,6 @@
 {
   "name": "web2md-mcp",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "MCP server that converts web pages to clean Markdown",
   "bin": {
     "web2md-mcp": "./bin/cli.js"
