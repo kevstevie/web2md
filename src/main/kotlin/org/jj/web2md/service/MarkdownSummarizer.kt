@@ -12,6 +12,7 @@ class MarkdownSummarizer(private val textRankSummarizer: TextRankSummarizer) {
         private val INLINE_CODE = Regex("`[^`]+`")
         private val HEADING = Regex("^#{1,6}\\s+.+")
         private val LIST_ITEM = Regex("^\\s*[-*+]\\s+.+|^\\s*\\d+\\.\\s+.+")
+        private val TABLE_ROW = Regex("^\\s*\\|.*\\|\\s*$")
         private val SENTENCE_BOUNDARY = Regex("(?<=[.!?。？！]\\s?)(?=\\S)")
 
         private fun levelToMaxChars(level: Int): Int = when (level.coerceIn(1, 5)) {
@@ -44,6 +45,7 @@ class MarkdownSummarizer(private val textRankSummarizer: TextRankSummarizer) {
         }
 
         if (indexed.isEmpty()) return buildStructureOnly(sections, maxChars)
+            .ifBlank { markdown.take(maxChars).trim() }
 
         // 전역 TextRank로 중요 문장 선별
         val topK = maxOf(MIN_SUMMARY_SENTENCES, indexed.size * topPercent / 100)
@@ -58,6 +60,8 @@ class MarkdownSummarizer(private val textRankSummarizer: TextRankSummarizer) {
             .groupBy({ it.first }, { it.second })
 
         return buildSummary(sections, importantBySect, maxChars)
+            .ifBlank { buildStructureOnly(sections, maxChars) }
+            .ifBlank { markdown.take(maxChars).trim() }
     }
 
     private fun parseSections(lines: List<String>): List<Section> {
@@ -85,13 +89,19 @@ class MarkdownSummarizer(private val textRankSummarizer: TextRankSummarizer) {
     }
 
     private fun extractProseSentences(body: List<String>): List<String> {
-        val prose = body
-            .filter { it.isNotBlank() && !LIST_ITEM.matches(it) }
-            .joinToString(" ")
-            .let { INLINE_CODE.replace(it, "") }
-            .trim()
-        return if (prose.isBlank()) emptyList()
-        else splitSentences(prose)
+        return body
+            .filter { it.isNotBlank() && !LIST_ITEM.matches(it) && !TABLE_ROW.matches(it) }
+            .flatMap { line ->
+                val cleaned = INLINE_CODE.replace(line, "").trim()
+                if (cleaned.isBlank()) emptyList()
+                else {
+                    val parts = splitSentences(cleaned)
+                    // 문장 경계가 없는 줄(한국어 등)은 줄 전체를 하나의 문장으로 유지
+                    parts.ifEmpty {
+                        if (cleaned.length >= MIN_SENTENCE_LENGTH) listOf(cleaned) else emptyList()
+                    }
+                }
+            }
     }
 
     private fun buildSummary(
