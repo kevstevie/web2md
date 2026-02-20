@@ -18,6 +18,10 @@ import kotlin.test.assertTrue
 @ExtendWith(MockitoExtension::class)
 class WebToMarkdownToolTest {
 
+    companion object {
+        private const val CONTENT = "This is sample content for testing the web to markdown conversion tool."
+    }
+
     @Mock
     private lateinit var staticHtmlFetcher: StaticHtmlFetcher
 
@@ -38,12 +42,12 @@ class WebToMarkdownToolTest {
         val url = "https://example.com"
         val doc = Jsoup.parse("<html><head><title>Example</title></head><body><p>Hello</p></body></html>")
         whenever(staticHtmlFetcher.fetch(url)).thenReturn(doc)
-        whenever(htmlToMarkdownConverter.convert(doc)).thenReturn("Hello")
+        whenever(htmlToMarkdownConverter.convert(doc)).thenReturn(CONTENT)
 
         val result = tool.webToMarkdown(url)
 
         assertContains(result, "# Example")
-        assertContains(result, "Hello")
+        assertContains(result, CONTENT)
     }
 
     @Test
@@ -51,11 +55,11 @@ class WebToMarkdownToolTest {
         val url = "https://example.com"
         val doc = Jsoup.parse("<html><body><p>Hello</p></body></html>")
         whenever(staticHtmlFetcher.fetch(url)).thenReturn(doc)
-        whenever(htmlToMarkdownConverter.convert(doc)).thenReturn("Hello")
+        whenever(htmlToMarkdownConverter.convert(doc)).thenReturn(CONTENT)
 
         val result = tool.webToMarkdown(url)
 
-        assertTrue(result.startsWith("Hello"))
+        assertTrue(result.startsWith(CONTENT))
     }
 
     @Test
@@ -63,12 +67,12 @@ class WebToMarkdownToolTest {
         val url = "https://example.com"
         val doc = Jsoup.parse("<html><head><title>SPA Page</title></head><body><p>Rendered</p></body></html>")
         whenever(jsHtmlFetcher.fetch(url)).thenReturn(doc)
-        whenever(htmlToMarkdownConverter.convert(doc)).thenReturn("Rendered")
+        whenever(htmlToMarkdownConverter.convert(doc)).thenReturn(CONTENT)
 
         val result = tool.webToMarkdown(url, jsEnabled = true)
 
         assertContains(result, "# SPA Page")
-        assertContains(result, "Rendered")
+        assertContains(result, CONTENT)
     }
 
     @Test
@@ -111,8 +115,8 @@ class WebToMarkdownToolTest {
         val url = "https://example.com"
         val doc = Jsoup.parse("<html><head><title>Example</title></head><body><p>Content</p></body></html>")
         whenever(staticHtmlFetcher.fetch(url)).thenReturn(doc)
-        whenever(htmlToMarkdownConverter.convert(doc)).thenReturn("Content")
-        whenever(markdownSummarizer.summarize("# Example\n\nContent", 3)).thenReturn("요약된 내용")
+        whenever(htmlToMarkdownConverter.convert(doc)).thenReturn(CONTENT)
+        whenever(markdownSummarizer.summarize("# Example\n\n$CONTENT", 3)).thenReturn("요약된 내용")
 
         val result = tool.webToMarkdown(url, summaryLevel = 3)
 
@@ -124,12 +128,12 @@ class WebToMarkdownToolTest {
         val url = "https://example.com"
         val doc = Jsoup.parse("<html><head><title>Example</title></head><body><p>Full content here</p></body></html>")
         whenever(staticHtmlFetcher.fetch(url)).thenReturn(doc)
-        whenever(htmlToMarkdownConverter.convert(doc)).thenReturn("Full content here")
+        whenever(htmlToMarkdownConverter.convert(doc)).thenReturn(CONTENT)
 
         val result = tool.webToMarkdown(url, summaryLevel = null)
 
         assertContains(result, "# Example")
-        assertContains(result, "Full content here")
+        assertContains(result, CONTENT)
     }
 
     @Test
@@ -137,8 +141,8 @@ class WebToMarkdownToolTest {
         val url = "https://example.com"
         val doc = Jsoup.parse("<html><head><title>Test</title></head><body><p>Brief</p></body></html>")
         whenever(staticHtmlFetcher.fetch(url)).thenReturn(doc)
-        whenever(htmlToMarkdownConverter.convert(doc)).thenReturn("Brief")
-        whenever(markdownSummarizer.summarize("# Test\n\nBrief", 1)).thenReturn("매우 간결한 요약")
+        whenever(htmlToMarkdownConverter.convert(doc)).thenReturn(CONTENT)
+        whenever(markdownSummarizer.summarize("# Test\n\n$CONTENT", 1)).thenReturn("매우 간결한 요약")
 
         val result = tool.webToMarkdown(url, summaryLevel = 1)
 

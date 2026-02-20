@@ -14,6 +14,9 @@ class StaticHtmlFetcher(private val properties: WebFetcherProperties) : HtmlFetc
         try {
             return Jsoup.connect(url)
                 .userAgent(properties.userAgent)
+                .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
+                .header("Accept-Language", "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7")
+                .header("Accept-Encoding", "gzip")
                 .timeout(properties.timeoutMillis)
                 .maxBodySize(properties.maxBodySizeBytes)
                 .followRedirects(true)

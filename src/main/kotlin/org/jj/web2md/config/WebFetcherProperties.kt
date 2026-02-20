@@ -10,6 +10,7 @@ data class WebFetcherProperties(
     val js: JsConfig = JsConfig()
 ) {
     data class JsConfig(
-        val waitMillis: Int = 3_000
+        val waitMillis: Int = 5_000,
+        val additionalWaitMillis: Int = 2_000
     )
 }

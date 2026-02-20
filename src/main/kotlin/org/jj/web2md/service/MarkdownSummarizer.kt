@@ -102,7 +102,7 @@ class MarkdownSummarizer(private val textRankSummarizer: TextRankSummarizer) {
         val result = StringBuilder()
         for ((sIdx, section) in sections.withIndex()) {
             val chunk = renderSection(section, importantBySect[sIdx] ?: emptyList())
-            if (result.length + chunk.length > maxChars) break
+            if (result.isNotEmpty() && result.length + chunk.length > maxChars) break
             result.append(chunk)
         }
         return result.toString().trim()
@@ -113,7 +113,7 @@ class MarkdownSummarizer(private val textRankSummarizer: TextRankSummarizer) {
         val result = StringBuilder()
         for (section in sections) {
             val chunk = renderSection(section, emptyList())
-            if (result.length + chunk.length > maxChars) break
+            if (result.isNotEmpty() && result.length + chunk.length > maxChars) break
             result.append(chunk)
         }
         return result.toString().trim()

@@ -131,8 +131,8 @@ Or manually add to `.claude/settings.json`:
 
 ## Features / 기능
 
-- **Web Page Fetching** - Fetches HTML from any public URL using Jsoup
-- **JavaScript Support** - Renders JavaScript-heavy pages (React, Vue, Angular, etc.) using HtmlUnit
+- **Web Page Fetching** - Fetches HTML from any public URL using Jsoup with browser-like headers
+- **JavaScript Support** - Renders JavaScript-heavy pages (React, Vue, Angular, etc.) using HtmlUnit with 2-phase async wait
 - **Smart Content Extraction** - Automatically finds the main content (`<main>`, `<article>`, `[role=main]`)
 - **HTML Cleanup** - Removes scripts, styles, nav, footer, ads, and other non-content elements
 - **Markdown Conversion** - Converts clean HTML to Markdown using Flexmark
@@ -142,8 +142,8 @@ Or manually add to `.claude/settings.json`:
 
 ---
 
-- **웹 페이지 가져오기** - Jsoup을 사용하여 공개 URL에서 HTML을 가져옵니다
-- **JavaScript 지원** - HtmlUnit을 사용하여 JS로 렌더링되는 페이지(React, Vue, Angular 등)를 처리합니다
+- **웹 페이지 가져오기** - 브라우저와 유사한 헤더로 Jsoup을 사용하여 공개 URL에서 HTML을 가져옵니다
+- **JavaScript 지원** - HtmlUnit을 사용하여 JS로 렌더링되는 페이지(React, Vue, Angular 등)를 2단계 대기 전략으로 처리합니다
 - **스마트 본문 추출** - `<main>`, `<article>`, `[role=main]` 순으로 본문을 자동 감지합니다
 - **HTML 정리** - script, style, nav, footer, 광고 등 불필요한 요소를 제거합니다
 - **마크다운 변환** - Flexmark를 사용하여 정리된 HTML을 마크다운으로 변환합니다
@@ -218,10 +218,11 @@ Configurable via `application.properties`:
 
 | Property | Default | Description |
 |----------|---------|-------------|
-| `web2md.fetcher.timeout-millis` | `10000` | HTTP request timeout (ms) |
+| `web2md.fetcher.timeout-millis` | `15000` | HTTP request timeout (ms) |
 | `web2md.fetcher.max-body-size-bytes` | `5242880` | Max response body size (5MB) |
 | `web2md.fetcher.user-agent` | `Mozilla/5.0 (compatible; web2md/1.0)` | User-Agent header |
-| `web2md.fetcher.js.wait-millis` | `3000` | Max wait time for JS execution (ms) |
+| `web2md.fetcher.js.wait-millis` | `5000` | Max wait time for initial JS execution (ms) |
+| `web2md.fetcher.js.additional-wait-millis` | `2000` | Additional wait for async JS jobs triggered after initial load (ms) |
 
 ## Project Structure / 프로젝트 구조
 

@@ -20,11 +20,11 @@ class WebToMarkdownTool(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    @Tool(description = "Fetches a web page from the given URL and converts it to Markdown. Omit summaryLevel for full content. Set summaryLevel 1-5 for an extractive summary (1=most concise, 5=most detailed).")
+    @Tool(description = "Fetches a web page from the given URL and converts it to Markdown. For full content, omit summaryLevel. For an extractive summary, set summaryLevel to an integer 1-5 (1=most concise, 5=most detailed). Do not pass null as a value.")
     fun webToMarkdown(
         @ToolParam(description = "The URL of the web page to fetch") url: String,
         @ToolParam(description = "Set to true for JavaScript-rendered SPA pages (React, Vue, Angular, etc.). Default is false.") jsEnabled: Boolean = false,
-        @ToolParam(description = "Summary level from 1 (most concise) to 5 (most detailed). Omit or set to null for full content without summarization.") summaryLevel: Int? = null
+        @ToolParam(description = "Integer 1-5 for extractive summary. 1=most concise, 5=most detailed. Omit this parameter entirely for full content.") summaryLevel: Int? = null
     ): String {
         return try {
             val fetcher = if (jsEnabled) jsHtmlFetcher else staticHtmlFetcher
