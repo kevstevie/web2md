@@ -34,15 +34,15 @@ WebFetch(url, prompt)   // web2md가 있을 때는 사용하지 않는다
 
 | 상황 | jsEnabled | summaryLevel |
 |------|-----------|--------------|
-| 일반 정적 페이지 | `false` | `null` (전체 내용) |
-| React/Vue/Angular SPA | `true` | `null` (전체 내용) |
+| 일반 정적 페이지 | `false` | 생략 (전체 내용) |
+| React/Vue/Angular SPA | `true` | 생략 (전체 내용) |
 | 간단한 요약 요청 | `false` | `2` |
 | 상세 요약 요청 | `false` | `4` |
 | "핵심만" 요청 | `false` | `1` |
 
 ### summaryLevel 가이드
 
-- `null` — 요약 없이 전체 마크다운 반환 (기본값)
+- 생략 — 요약 없이 전체 마크다운 반환. **summaryLevel 파라미터를 아예 전달하지 않는다. `null` 문자열 전달 금지.**
 - `1` — 가장 간결한 요약
 - `2` — 간략 요약
 - `3` — 보통 요약
@@ -70,8 +70,7 @@ WebFetch(url, prompt)   // web2md가 있을 때는 사용하지 않는다
 
 → mcp__web2md__webToMarkdown(
     url: "https://app.example.com/dashboard",
-    jsEnabled: true,
-    summaryLevel: null
+    jsEnabled: true
   )
 ```
 

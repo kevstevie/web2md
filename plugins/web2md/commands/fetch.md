@@ -17,7 +17,7 @@ The user invoked this command with: $ARGUMENTS
 Parse the arguments as follows (order does not matter):
 
 1. **url** (required): The argument that starts with `http://` or `https://` is the URL.
-2. **summaryLevel** (optional): Any integer 1–5, or `summaryLevel=N`. If not provided, use `null` for full content.
+2. **summaryLevel** (optional): Any integer 1–5, or `summaryLevel=N`. If not provided, **omit this parameter entirely** — do not pass `null` or any string.
 3. **js** (optional): The keyword `js` or `js=true` sets `jsEnabled=true`. Default is `false`.
 
 Then call `mcp__web2md__webToMarkdown` with the parsed parameters and return the result directly.
@@ -26,10 +26,10 @@ Then call `mcp__web2md__webToMarkdown` with the parsed parameters and return the
 
 | User Input | url | jsEnabled | summaryLevel |
 |------------|-----|-----------|--------------|
-| `/web2md https://example.com` | `https://example.com` | `false` | `null` |
+| `/web2md https://example.com` | `https://example.com` | `false` | 생략 |
 | `/web2md https://example.com 3` | `https://example.com` | `false` | `3` |
 | `/web2md https://example.com summaryLevel=2` | `https://example.com` | `false` | `2` |
-| `/web2md https://example.com js` | `https://example.com` | `true` | `null` |
+| `/web2md https://example.com js` | `https://example.com` | `true` | 생략 |
 | `/web2md https://example.com js 1` | `https://example.com` | `true` | `1` |
 | `/web2md https://example.com 1 js` | `https://example.com` | `true` | `1` |
 
