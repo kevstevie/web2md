@@ -52,7 +52,11 @@ cd web2md
 ./gradlew bootJar
 ```
 
-## Getting Started / 시작하기
+## Getting Started (Option 3: Source Build) / 시작하기 (소스 빌드)
+
+> Skip this section if you installed via `claude plugin install` or npm.
+>
+> `claude plugin install` 또는 npm으로 설치했다면 이 섹션은 건너뛰세요.
 
 ### Prerequisites / 사전 요구사항
 
@@ -61,7 +65,7 @@ cd web2md
 ### Build / 빌드
 
 ```bash
-./gradlew build
+./gradlew bootJar
 ```
 
 ### Run / 실행
@@ -282,8 +286,10 @@ web2md/
 
 - JavaScript support via HtmlUnit uses the Rhino engine, which may not handle modern ES6+ module-based SPAs (e.g., Vite builds) correctly.
 - Maximum body size is 5MB by default.
+- Sites protected by Akamai Bot Manager or Cloudflare Bot Manager may return empty or blocked responses.
 
 ---
 
 - HtmlUnit의 JS 지원은 Rhino 엔진 기반으로, 최신 ES6+ 모듈 방식의 SPA(Vite 빌드 결과물 등)는 정상적으로 동작하지 않을 수 있습니다.
 - 기본 최대 본문 크기는 5MB입니다.
+- Akamai Bot Manager 또는 Cloudflare Bot Manager가 적용된 사이트는 빈 응답이나 차단 응답을 반환할 수 있습니다.
