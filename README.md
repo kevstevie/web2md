@@ -29,7 +29,8 @@ MCP 서버, `web-summarize` 스킬, `/web2md` 커맨드를 한 번에 설치합�
 Installs the MCP server, `web-summarize` skill, and `/web2md` command in one step.
 
 ```bash
-claude plugin install github:kevstevie/web2md
+claude plugin marketplace add github:kevstevie/web2md
+claude plugin install web2md
 ```
 
 > **Requires Java 17+** for the MCP server.
@@ -250,13 +251,16 @@ Configurable via `application.properties`:
 
 ```
 web2md/
-├── plugin.json                    # Claude Code plugin manifest / 플러그인 메타데이터
-├── .mcp.json                      # MCP server auto-config (for plugin installs) / MCP 서버 자동 설정
-├── skills/
-│   └── web-summarize/
-│       └── SKILL.md               # Auto-invoke web2md on URL requests / URL 요청 시 자동 실행
-├── commands/
-│   └── web2md.md                  # /web2md <url> slash command / 슬래시 커맨드
+├── plugins/
+│   └── web2md/                    # Claude Code plugin / 플러그인
+│       ├── .claude-plugin/
+│       │   └── plugin.json        # Plugin manifest / 플러그인 메타데이터
+│       ├── .mcp.json              # MCP server auto-config / MCP 서버 자동 설정
+│       ├── skills/
+│       │   └── web-summarize/
+│       │       └── SKILL.md       # Auto-invoke web2md on URL requests / URL 요청 시 자동 실행
+│       └── commands/
+│           └── web2md.md          # /web2md <url> slash command / 슬래시 커맨드
 └── src/main/kotlin/org/jj/web2md/
     ├── Web2mdApplication.kt           # Entry point / 진입점
     ├── config/
