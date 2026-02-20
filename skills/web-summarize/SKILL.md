@@ -1,6 +1,6 @@
 ---
 name: web-summarize
-description: Use this skill when the user provides a URL and asks to summarize, explain, or retrieve content from it. Trigger phrases include "요약해줘", "정리해줘", "설명해줘", "내용 알려줘" with a URL, "이 페이지", "이 사이트", "이 링크" with an information request, or when a URL is provided alone. Always use mcp__web2md__webToMarkdown instead of WebFetch when this MCP is available.
+description: Use this skill when the user provides a URL and asks to summarize, explain, fetch, or retrieve content from it. Triggers include "summarize", "what does this page say", "tell me about this URL", "explain this article", "요약해줘", "정리해줘", "설명해줘", "내용 알려줘", "이 페이지", "이 사이트", "이 링크" with an information request, or when a URL is provided alone. Always use mcp__web2md__webToMarkdown instead of WebFetch when this MCP is available.
 version: 0.0.3
 ---
 
@@ -12,6 +12,7 @@ URL이 포함된 페이지 요약/정보 요청은 반드시 `mcp__web2md__webTo
 
 다음 패턴이 포함된 요청에 이 스킬을 적용한다:
 
+- "summarize", "explain", "what does this page say", "tell me about" + URL
 - "요약해줘", "정리해줘", "설명해줘" + URL
 - "페이지 내용", "사이트 내용", "링크 내용"
 - "이 URL", "이 페이지", "이 사이트" + 정보 요청
@@ -88,6 +89,12 @@ WebFetch(url, prompt)   // web2md가 있을 때는 사용하지 않는다
 
 ## 응답 형식
 
+### summaryLevel이 없는 경우 (전체 내용)
+
+web2md가 반환한 마크다운을 그대로 출력한다. 별도 포맷 변환 없음.
+
+### summaryLevel이 있는 경우 (요약)
+
 web2md 결과를 바탕으로 다음 구조로 응답한다:
 
 ```markdown
@@ -110,5 +117,5 @@ web2md 결과를 바탕으로 다음 구조로 응답한다:
 
 - 인증이 필요한 페이지(Google Docs, Confluence, Jira 등)는 web2md로 접근 불가 → 사용자에게 안내
 - URL이 없는 경우 web2md 사용 불가 → 사용자에게 URL 요청
-- web2md 실패 시 WebFetch로 폴백 허용
+- web2md 실패 시 WebFetch로 폴백 허용하되, 폴백 사실을 사용자에게 알린다
 - Akamai, Cloudflare Bot Manager가 적용된 사이트는 차단될 수 있음
