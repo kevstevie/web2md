@@ -1,0 +1,7 @@
+{
+  "web2md": {
+    "type": "stdio",
+    "command": "npx",
+    "args": ["-y", "web2md-mcp@latest"]
+  }
+}

@@ -22,17 +22,29 @@ MCP(Model Context Protocol) 서버로, 웹 페이지를 깨끗한 마크다운�
 
 ## Installation / 설치
 
-### Option 1: npm (Recommended / 추천)
+### Option 1: Claude Code Plugin (Recommended / 추천)
 
-No build required. Just configure and use.
+MCP 서버, `web-summarize` 스킬, `/web2md` 커맨드를 한 번에 설치합니다.
 
-빌드 없이 바로 사용할 수 있습니다.
+Installs the MCP server, `web-summarize` skill, and `/web2md` command in one step.
+
+```bash
+claude plugin install github:kevstevie/web2md
+```
+
+> **Requires Java 17+** for the MCP server.
+
+### Option 2: npm (MCP server only / MCP 서버만)
+
+MCP 서버만 설치합니다. 클라이언트 설정은 직접 해야 합니다.
+
+Installs only the MCP server. Configure your MCP client manually (see below).
 
 ```bash
 npm install -g web2md-mcp
 ```
 
-### Option 2: Build from source / 소스에서 빌드
+### Option 3: Build from source / 소스에서 빌드
 
 ```bash
 git clone https://github.com/kevstevie/web2md.git
@@ -63,6 +75,10 @@ The server runs in STDIO mode and communicates via JSON-RPC over stdin/stdout.
 서버는 STDIO 모드로 실행되며, stdin/stdout을 통해 JSON-RPC로 통신합니다.
 
 ## MCP Client Configuration / MCP 클라이언트 설정
+
+> **Note**: If you installed via `claude plugin install`, the MCP server is already configured automatically. The following is only needed for npm / source installs.
+>
+> **참고**: `claude plugin install`로 설치했다면 MCP 서버가 자동으로 설정됩니다. 아래는 npm/소스 설치 시에만 필요합니다.
 
 ### Claude Desktop
 
@@ -139,6 +155,7 @@ Or manually add to `.claude/settings.json`:
 - **Extractive Summarization** - Summarizes content using TF-IDF + TextRank with Korean morphological analysis (Komoran). No API key required.
 - **SSRF Protection** - Blocks requests to private/internal IP addresses (127.0.0.1, 10.x, 192.168.x, etc.)
 - **Configurable** - Timeout, max body size, and user agent are configurable via properties
+- **Claude Code Plugin** - Bundles `web-summarize` skill (auto-invokes web2md on URL requests) and `/web2md` slash command
 
 ---
 
@@ -150,6 +167,7 @@ Or manually add to `.claude/settings.json`:
 - **추출 요약** - TF-IDF + TextRank 알고리즘과 한국어 형태소 분석기(Komoran)를 활용한 요약. API 키 불필요.
 - **SSRF 방어** - 사설/내부 IP(127.0.0.1, 10.x, 192.168.x 등)로의 요청을 차단합니다
 - **설정 가능** - timeout, 최대 본문 크기, user agent를 프로퍼티로 설정할 수 있습니다
+- **Claude Code 플러그인** - URL 요청 시 자동으로 web2md를 사용하는 `web-summarize` 스킬과 `/web2md` 슬래시 커맨드 포함
 
 ## Tech Stack / 기술 스택
 
@@ -227,29 +245,37 @@ Configurable via `application.properties`:
 ## Project Structure / 프로젝트 구조
 
 ```
-src/main/kotlin/org/jj/web2md/
-├── Web2mdApplication.kt           # Entry point / 진입점
-├── config/
-│   ├── McpConfig.kt               # MCP tool registration / MCP 도구 등록
-│   ├── TokenizerConfig.kt         # Tokenizer bean (auto language detection) / 언어 자동 감지
-│   └── WebFetcherProperties.kt    # Configuration properties / 설정 프로퍼티
-├── tool/
-│   └── WebToMarkdownTool.kt       # MCP tool (fetch + convert + optional summarize)
-├── service/
-│   ├── MarkdownSummarizer.kt      # Section-aware extractive summarizer / 섹션 기반 추출 요약기
-│   ├── TextRankSummarizer.kt      # TF-IDF + TextRank sentence ranker / 문장 중요도 계산
-│   └── tokenizer/
-│       ├── Tokenizer.kt           # Tokenizer interface / 토크나이저 인터페이스
-│       ├── SimpleTokenizer.kt     # English tokenizer (stop word filtering) / 영어 토크나이저
-│       └── KoreanTokenizer.kt     # Korean morphological analyzer (Komoran) / 한국어 형태소 분석
-├── fetcher/
-│   ├── HtmlFetcherStrategy.kt     # Fetcher interface / Fetcher 인터페이스
-│   ├── HtmlFetcher.kt             # Jsoup-based static fetcher / 정적 페이지 fetcher
-│   └── JsHtmlFetcher.kt           # HtmlUnit-based JS fetcher / JS 렌더링 fetcher
-├── converter/
-│   └── HtmlToMarkdownConverter.kt # HTML cleanup + Markdown conversion / HTML 정리 + 변환
-└── exception/
-    └── Web2mdExceptions.kt        # Custom exceptions / 커스텀 예외
+web2md/
+├── plugin.json                    # Claude Code plugin manifest / 플러그인 메타데이터
+├── .mcp.json                      # MCP server auto-config (for plugin installs) / MCP 서버 자동 설정
+├── skills/
+│   └── web-summarize/
+│       └── SKILL.md               # Auto-invoke web2md on URL requests / URL 요청 시 자동 실행
+├── commands/
+│   └── web2md.md                  # /web2md <url> slash command / 슬래시 커맨드
+└── src/main/kotlin/org/jj/web2md/
+    ├── Web2mdApplication.kt           # Entry point / 진입점
+    ├── config/
+    │   ├── McpConfig.kt               # MCP tool registration / MCP 도구 등록
+    │   ├── TokenizerConfig.kt         # Tokenizer bean (auto language detection) / 언어 자동 감지
+    │   └── WebFetcherProperties.kt    # Configuration properties / 설정 프로퍼티
+    ├── tool/
+    │   └── WebToMarkdownTool.kt       # MCP tool (fetch + convert + optional summarize)
+    ├── service/
+    │   ├── MarkdownSummarizer.kt      # Section-aware extractive summarizer / 섹션 기반 추출 요약기
+    │   ├── TextRankSummarizer.kt      # TF-IDF + TextRank sentence ranker / 문장 중요도 계산
+    │   └── tokenizer/
+    │       ├── Tokenizer.kt           # Tokenizer interface / 토크나이저 인터페이스
+    │       ├── SimpleTokenizer.kt     # English tokenizer (stop word filtering) / 영어 토크나이저
+    │       └── KoreanTokenizer.kt     # Korean morphological analyzer (Komoran) / 한국어 형태소 분석
+    ├── fetcher/
+    │   ├── HtmlFetcherStrategy.kt     # Fetcher interface / Fetcher 인터페이스
+    │   ├── HtmlFetcher.kt             # Jsoup-based static fetcher / 정적 페이지 fetcher
+    │   └── JsHtmlFetcher.kt           # HtmlUnit-based JS fetcher / JS 렌더링 fetcher
+    ├── converter/
+    │   └── HtmlToMarkdownConverter.kt # HTML cleanup + Markdown conversion / HTML 정리 + 변환
+    └── exception/
+        └── Web2mdExceptions.kt        # Custom exceptions / 커스텀 예외
 ```
 
 ## Limitations / 제한사항

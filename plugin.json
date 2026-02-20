@@ -1,0 +1,11 @@
+{
+  "name": "web2md",
+  "description": "Fetches web pages and converts them to clean Markdown. Includes the web-summarize skill that automatically uses web2md when summarizing URLs, and a /web2md slash command for direct conversion.",
+  "author": {
+    "name": "kevstevie",
+    "url": "https://github.com/kevstevie"
+  },
+  "version": "0.0.3",
+  "license": "UNLICENSED",
+  "repository": "https://github.com/kevstevie/web2md"
+}
