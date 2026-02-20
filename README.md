@@ -29,7 +29,7 @@ MCP 서버, `web-summarize` 스킬, `/web2md` 커맨드를 한 번에 설치합�
 Installs the MCP server, `web-summarize` skill, and `/web2md` command in one step.
 
 ```bash
-claude plugin marketplace add github:kevstevie/web2md
+claude plugin marketplace add kevstevie/web2md
 claude plugin install web2md
 ```
 
