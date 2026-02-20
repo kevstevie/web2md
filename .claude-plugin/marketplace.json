@@ -1,0 +1,23 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "kevstevie-web2md",
+  "description": "web2md plugin marketplace — converts web pages to clean Markdown with LLM token savings",
+  "owner": {
+    "name": "kevstevie",
+    "url": "https://github.com/kevstevie"
+  },
+  "plugins": [
+    {
+      "name": "web2md",
+      "description": "Fetches web pages and converts them to clean Markdown for LLM token savings. Includes the web-summarize skill (auto-invokes web2md on URL requests) and /web2md slash command. Requires Java 17+.",
+      "version": "0.0.3",
+      "author": {
+        "name": "kevstevie",
+        "url": "https://github.com/kevstevie"
+      },
+      "source": "./plugins/web2md",
+      "category": "productivity",
+      "homepage": "https://github.com/kevstevie/web2md"
+    }
+  ]
+}
