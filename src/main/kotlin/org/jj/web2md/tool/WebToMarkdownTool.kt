@@ -23,6 +23,11 @@ class WebToMarkdownTool(
         @ToolParam(description = "The URL of the web page to fetch") url: String,
         @ToolParam(description = "Integer 1-5 for extractive summary. 1=most concise, 5=most detailed. Omit this parameter entirely for full content.") summaryLevel: Int? = null
     ): String {
+        if (summaryLevel != null && summaryLevel !in 1..5) {
+            return "Error: summaryLevel must be between 1 and 5."
+        }
+        // 로그 인젝션 방지: 제어 문자 제거
+        val safeUrl = url.replace(Regex("[\r\n\t]"), "_")
         return try {
             val document = htmlFetcher.fetch(url)
             val title = document.title()
@@ -31,13 +36,13 @@ class WebToMarkdownTool(
 
             if (summaryLevel != null) markdownSummarizer.summarize(fullMarkdown, summaryLevel) else fullMarkdown
         } catch (e: Web2mdException.InvalidUrlException) {
-            logger.warn("Invalid URL provided: {}", url)
+            logger.warn("Invalid URL provided: {}", safeUrl)
             "Error: The provided URL is invalid. Only http and https URLs pointing to public hosts are supported."
         } catch (e: Web2mdException.FetchFailedException) {
-            logger.warn("Failed to fetch URL: {}", url, e)
+            logger.warn("Failed to fetch URL: {}", safeUrl)
             "Error: Failed to fetch the web page. Please check if the URL is accessible."
         } catch (e: Exception) {
-            logger.error("Unexpected error processing URL: {}", url, e)
+            logger.error("Unexpected error processing URL: {}", safeUrl)
             "Error: An unexpected error occurred while processing the request."
         }
     }
