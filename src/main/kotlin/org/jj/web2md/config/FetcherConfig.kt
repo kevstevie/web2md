@@ -31,7 +31,7 @@ class FetcherConfig(
 
         return if (usePlaywright) {
             logger.info("Playwright 감지됨 → PlaywrightHtmlFetcher 사용")
-            PlaywrightHtmlFetcher(playwrightManager)
+            PlaywrightHtmlFetcher(playwrightManager, properties)
         } else {
             logger.info("Playwright 미설치 → StaticHtmlFetcher (Jsoup) 사용")
             staticHtmlFetcher
