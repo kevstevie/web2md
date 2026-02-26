@@ -1,6 +1,7 @@
 package org.jj.web2md.fetcher
 
 import com.microsoft.playwright.Page
+import org.jj.web2md.config.WebFetcherProperties
 import org.jj.web2md.exception.Web2mdException
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -32,7 +33,7 @@ class PlaywrightHtmlFetcherTest {
 
     @BeforeEach
     fun setUp() {
-        fetcher = PlaywrightHtmlFetcher(manager)
+        fetcher = PlaywrightHtmlFetcher(manager, WebFetcherProperties())
         // PlaywrightManager.withPage { block } 호출 시 mock page를 전달하도록 설정
         doAnswer { invocation ->
             val block = invocation.getArgument<(Page) -> Any>(0)

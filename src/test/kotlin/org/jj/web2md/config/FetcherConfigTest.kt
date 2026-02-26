@@ -3,6 +3,7 @@ package org.jj.web2md.config
 import org.jj.web2md.fetcher.PlaywrightManager
 import org.jj.web2md.fetcher.StaticHtmlFetcher
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
@@ -61,12 +62,9 @@ class FetcherConfigTest {
     }
 
     @Test
-    fun `unknown engine value should fall back to auto behavior`() {
-        whenever(playwrightManager.initialize()).thenReturn(false)
-        val config = FetcherConfig(staticHtmlFetcher, playwrightManager, WebFetcherProperties(engine = "unknown"))
-
-        val fetcher = config.htmlFetcher()
-
-        assertIs<StaticHtmlFetcher>(fetcher)
+    fun `unknown engine value should throw IllegalArgumentException`() {
+        assertThrows<IllegalArgumentException> {
+            WebFetcherProperties(engine = "unknown")
+        }
     }
 }
