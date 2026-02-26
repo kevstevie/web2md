@@ -13,8 +13,8 @@ class PlaywrightManager {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    private var playwright: Playwright? = null
-    private var browser: Browser? = null
+    @Volatile private var playwright: Playwright? = null
+    @Volatile private var browser: Browser? = null
 
     fun initialize(): Boolean {
         return try {
