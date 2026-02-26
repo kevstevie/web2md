@@ -2,8 +2,7 @@ package org.jj.web2md.tool
 
 import org.jj.web2md.converter.HtmlToMarkdownConverter
 import org.jj.web2md.exception.Web2mdException
-import org.jj.web2md.fetcher.JsHtmlFetcher
-import org.jj.web2md.fetcher.StaticHtmlFetcher
+import org.jj.web2md.fetcher.HtmlFetcherStrategy
 import org.jj.web2md.service.MarkdownSummarizer
 import org.jsoup.Jsoup
 import org.junit.jupiter.api.Test
@@ -23,10 +22,7 @@ class WebToMarkdownToolTest {
     }
 
     @Mock
-    private lateinit var staticHtmlFetcher: StaticHtmlFetcher
-
-    @Mock
-    private lateinit var jsHtmlFetcher: JsHtmlFetcher
+    private lateinit var htmlFetcher: HtmlFetcherStrategy
 
     @Mock
     private lateinit var htmlToMarkdownConverter: HtmlToMarkdownConverter
@@ -38,10 +34,10 @@ class WebToMarkdownToolTest {
     private lateinit var tool: WebToMarkdownTool
 
     @Test
-    fun `should return markdown with title using static fetcher by default`() {
+    fun `should return markdown with title`() {
         val url = "https://example.com"
         val doc = Jsoup.parse("<html><head><title>Example</title></head><body><p>Hello</p></body></html>")
-        whenever(staticHtmlFetcher.fetch(url)).thenReturn(doc)
+        whenever(htmlFetcher.fetch(url)).thenReturn(doc)
         whenever(htmlToMarkdownConverter.convert(doc)).thenReturn(CONTENT)
 
         val result = tool.webToMarkdown(url)
@@ -54,7 +50,7 @@ class WebToMarkdownToolTest {
     fun `should return markdown without title prefix when title is blank`() {
         val url = "https://example.com"
         val doc = Jsoup.parse("<html><body><p>Hello</p></body></html>")
-        whenever(staticHtmlFetcher.fetch(url)).thenReturn(doc)
+        whenever(htmlFetcher.fetch(url)).thenReturn(doc)
         whenever(htmlToMarkdownConverter.convert(doc)).thenReturn(CONTENT)
 
         val result = tool.webToMarkdown(url)
@@ -63,22 +59,9 @@ class WebToMarkdownToolTest {
     }
 
     @Test
-    fun `should use js fetcher when jsEnabled is true`() {
-        val url = "https://example.com"
-        val doc = Jsoup.parse("<html><head><title>SPA Page</title></head><body><p>Rendered</p></body></html>")
-        whenever(jsHtmlFetcher.fetch(url)).thenReturn(doc)
-        whenever(htmlToMarkdownConverter.convert(doc)).thenReturn(CONTENT)
-
-        val result = tool.webToMarkdown(url, jsEnabled = true)
-
-        assertContains(result, "# SPA Page")
-        assertContains(result, CONTENT)
-    }
-
-    @Test
     fun `should return error string for invalid URL`() {
         val url = "ftp://invalid"
-        whenever(staticHtmlFetcher.fetch(url)).thenThrow(Web2mdException.InvalidUrlException(url))
+        whenever(htmlFetcher.fetch(url)).thenThrow(Web2mdException.InvalidUrlException(url))
 
         val result = tool.webToMarkdown(url)
 
@@ -89,7 +72,7 @@ class WebToMarkdownToolTest {
     @Test
     fun `should return error string for fetch failure`() {
         val url = "https://unreachable.example.com"
-        whenever(staticHtmlFetcher.fetch(url)).thenThrow(
+        whenever(htmlFetcher.fetch(url)).thenThrow(
             Web2mdException.FetchFailedException(url, RuntimeException("Connection refused"))
         )
 
@@ -102,7 +85,7 @@ class WebToMarkdownToolTest {
     @Test
     fun `should return error string for unexpected exception`() {
         val url = "https://example.com"
-        whenever(staticHtmlFetcher.fetch(url)).thenThrow(RuntimeException("Something went wrong"))
+        whenever(htmlFetcher.fetch(url)).thenThrow(RuntimeException("Something went wrong"))
 
         val result = tool.webToMarkdown(url)
 
@@ -114,7 +97,7 @@ class WebToMarkdownToolTest {
     fun `should return summarized content when summaryLevel is provided`() {
         val url = "https://example.com"
         val doc = Jsoup.parse("<html><head><title>Example</title></head><body><p>Content</p></body></html>")
-        whenever(staticHtmlFetcher.fetch(url)).thenReturn(doc)
+        whenever(htmlFetcher.fetch(url)).thenReturn(doc)
         whenever(htmlToMarkdownConverter.convert(doc)).thenReturn(CONTENT)
         whenever(markdownSummarizer.summarize("# Example\n\n$CONTENT", 3)).thenReturn("요약된 내용")
 
@@ -127,7 +110,7 @@ class WebToMarkdownToolTest {
     fun `should return full markdown when summaryLevel is null`() {
         val url = "https://example.com"
         val doc = Jsoup.parse("<html><head><title>Example</title></head><body><p>Full content here</p></body></html>")
-        whenever(staticHtmlFetcher.fetch(url)).thenReturn(doc)
+        whenever(htmlFetcher.fetch(url)).thenReturn(doc)
         whenever(htmlToMarkdownConverter.convert(doc)).thenReturn(CONTENT)
 
         val result = tool.webToMarkdown(url, summaryLevel = null)
@@ -140,7 +123,7 @@ class WebToMarkdownToolTest {
     fun `should pass summaryLevel to summarizer`() {
         val url = "https://example.com"
         val doc = Jsoup.parse("<html><head><title>Test</title></head><body><p>Brief</p></body></html>")
-        whenever(staticHtmlFetcher.fetch(url)).thenReturn(doc)
+        whenever(htmlFetcher.fetch(url)).thenReturn(doc)
         whenever(htmlToMarkdownConverter.convert(doc)).thenReturn(CONTENT)
         whenever(markdownSummarizer.summarize("# Test\n\n$CONTENT", 1)).thenReturn("매우 간결한 요약")
 
