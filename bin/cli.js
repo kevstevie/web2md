@@ -5,7 +5,14 @@ const path = require("path");
 
 const jarPath = path.join(__dirname, "web2md.jar");
 
-const child = spawn("java", ["-jar", jarPath], {
+const isInstallPlaywright = process.argv[2] === "install-playwright";
+const isDeps = process.argv.includes("--deps");
+
+const javaArgs = isInstallPlaywright
+  ? ["-cp", jarPath, "com.microsoft.playwright.CLI", isDeps ? "install-deps" : "install", "chromium"]
+  : ["-jar", jarPath];
+
+const child = spawn("java", javaArgs, {
   stdio: "inherit",
 });
 

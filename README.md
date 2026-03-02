@@ -35,6 +35,14 @@ claude plugin install web2md
 
 > **Requires Java 17+** for the MCP server.
 
+**Optional: Playwright for JavaScript-rendered pages (`jsEnabled=true`)**
+
+```bash
+npx web2md-mcp install-playwright
+# Linux only — system dependencies:
+npx web2md-mcp install-playwright --deps
+```
+
 ### Option 2: Claude Code — MCP only / MCP 서버만 등록
 
 Claude Code에 MCP 서버만 바로 등록합니다.
@@ -45,12 +53,28 @@ claude mcp add web2md -- npx -y web2md-mcp@latest
 
 > **Requires Java 17+** for the MCP server.
 
+**Optional: Playwright for JavaScript-rendered pages (`jsEnabled=true`)**
+
+```bash
+npx web2md-mcp install-playwright
+# Linux only — system dependencies:
+npx web2md-mcp install-playwright --deps
+```
+
 ### Option 3: Build from source / 소스에서 빌드
 
 ```bash
 git clone https://github.com/kevstevie/web2md.git
 cd web2md
 ./gradlew bootJar
+```
+
+**Optional: Playwright for JavaScript-rendered pages (`jsEnabled=true`)**
+
+```bash
+java -cp build/libs/web2md.jar com.microsoft.playwright.CLI install chromium
+# Linux only — system dependencies:
+java -cp build/libs/web2md.jar com.microsoft.playwright.CLI install-deps chromium
 ```
 
 ---
@@ -120,34 +144,6 @@ Option 1~3으로 설치 후, `claude_desktop_config.json`에 아래 내용을 �
 `jsEnabled=true` 옵션으로 React, Vue, Angular 등 JavaScript 렌더링 페이지를 처리하려면 Playwright 브라우저 바이너리가 필요합니다.
 
 To fetch JavaScript-rendered pages (React, Vue, Angular, etc.) with `jsEnabled=true`, install Playwright browser binaries.
-
-### Install Playwright browsers / Playwright 브라우저 설치
-
-**Step 1: Build the JAR (if not already built)**
-
-```bash
-./gradlew bootJar
-```
-
-**Step 2: Install Chromium via Playwright CLI**
-
-```bash
-java -cp build/libs/web2md.jar com.microsoft.playwright.CLI install chromium
-```
-
-Or install all browsers:
-
-```bash
-java -cp build/libs/web2md.jar com.microsoft.playwright.CLI install
-```
-
-> **Note (Linux):** You may need system dependencies. Run:
->
-> ```bash
-> java -cp build/libs/web2md.jar com.microsoft.playwright.CLI install-deps chromium
-> ```
->
-> **참고 (Linux):** 시스템 의존성이 필요할 수 있습니다.
 
 ### Engine configuration / 엔진 설정
 
