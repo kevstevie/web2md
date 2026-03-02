@@ -33,7 +33,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jsoup:jsoup:1.18.3")
     implementation("com.vladsch.flexmark:flexmark-html2md-converter:0.64.8")
-    implementation("org.htmlunit:htmlunit:4.21.0")
+    implementation("com.microsoft.playwright:playwright:1.49.0")
     implementation("com.github.shin285:KOMORAN:3.3.9")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")

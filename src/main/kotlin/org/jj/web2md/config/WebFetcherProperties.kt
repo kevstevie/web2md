@@ -7,10 +7,15 @@ data class WebFetcherProperties(
     val timeoutMillis: Int = 10_000,
     val maxBodySizeBytes: Int = 5 * 1024 * 1024,
     val userAgent: String = "Mozilla/5.0 (compatible; web2md/1.0)",
-    val js: JsConfig = JsConfig()
+    val engine: String = "auto"   // auto | jsoup | playwright
 ) {
-    data class JsConfig(
-        val waitMillis: Int = 5_000,
-        val additionalWaitMillis: Int = 2_000
-    )
+    init {
+        require(engine in VALID_ENGINES) {
+            "Invalid web2md.fetcher.engine value: '$engine'. Allowed values: ${VALID_ENGINES.joinToString()}"
+        }
+    }
+
+    companion object {
+        val VALID_ENGINES = setOf("auto", "jsoup", "playwright")
+    }
 }
