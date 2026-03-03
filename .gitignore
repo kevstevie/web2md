@@ -45,3 +45,4 @@ out/
 ### AI ###
 .claude
 .serena
+coverage/
