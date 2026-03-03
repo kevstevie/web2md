@@ -154,8 +154,9 @@ export function summarize(markdown: string, level: number = 3): string {
     return buildStructureOnly(sections, maxChars) || markdown.slice(0, maxChars).trim();
   }
 
-  const tokenizer = detectTokenizer(indexed.map(([, s]) => s).join(' '));
+  // Extract sentences once, reuse for tokenizer detection and ranking
   const sentences = indexed.map(([, s]) => s);
+  const tokenizer = detectTokenizer(sentences.join(' '));
   const topK = Math.max(MIN_SUMMARY_SENTENCES, Math.floor(indexed.length * topPercent / 100));
 
   const rankedIndices = rankSentences(sentences, tokenizer).slice(0, topK);
@@ -166,8 +167,8 @@ export function summarize(markdown: string, level: number = 3): string {
   for (let i = 0; i < indexed.length; i++) {
     if (importantIndices.has(i)) {
       const [sIdx, sent] = indexed[i];
-      const existing = importantBySect.get(sIdx) ?? [];
-      importantBySect.set(sIdx, [...existing, sent]);
+      if (!importantBySect.has(sIdx)) importantBySect.set(sIdx, []);
+      importantBySect.get(sIdx)!.push(sent);
     }
   }
 

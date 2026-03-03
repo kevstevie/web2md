@@ -15,11 +15,13 @@ const EMPTY_IMAGE = /!\[\]\([^)]*\)/g;
 // Only strip known Markdown extended attribute syntax {:.class} not generic {content}
 const MARKDOWN_EXTENDED_ATTR = /\{:[^}]+\}/g;
 
-const TURNDOWN_OPTIONS: ConstructorParameters<typeof TurndownService>[0] = {
+// Module-level singleton: TurndownService is stateless after construction
+// (no addRule calls), so it's safe to share across calls.
+const turndown = new TurndownService({
   headingStyle: 'atx',
   codeBlockStyle: 'fenced',
   bulletListMarker: '-',
-};
+});
 
 export function convertHtmlToMarkdown(html: string): { title: string; markdown: string } {
   const $ = cheerio.load(html);
@@ -48,8 +50,6 @@ export function convertHtmlToMarkdown(html: string): { title: string; markdown: 
     contentHtml = $('body').html() ?? $.html();
   }
 
-  // Create per-call instance to avoid shared state mutation
-  const turndown = new TurndownService(TURNDOWN_OPTIONS);
   const markdown = turndown.turndown(contentHtml);
   const processed = postProcess(markdown);
 

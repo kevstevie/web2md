@@ -1,11 +1,9 @@
 import { validateUrl } from '../utils/ssrf.js';
 import { FetchFailedError, InvalidUrlError } from '../utils/errors.js';
+import { MAX_URL_LENGTH, TIMEOUT_MS, USER_AGENT } from '../config/constants.js';
 import type { HtmlFetcher } from './types.js';
 
-const TIMEOUT_MS = 15_000;
-const MAX_URL_LENGTH = 2048;
-
-// Resource types that are heavy or not needed for text content extraction
+// Resource types not needed for text content extraction
 const BLOCKED_RESOURCE_TYPES = new Set(['media', 'font', 'image', 'stylesheet', 'websocket', 'eventsource']);
 
 export class PlaywrightFetcher implements HtmlFetcher {
@@ -26,35 +24,24 @@ export class PlaywrightFetcher implements HtmlFetcher {
 
     const browser = await chromium.launch({ headless: true });
     try {
-      const context = await browser.newContext({
-        userAgent: 'Mozilla/5.0 (compatible; web2md/1.0)',
-      });
+      const context = await browser.newContext({ userAgent: USER_AGENT });
       const page = await context.newPage();
       page.setDefaultNavigationTimeout(TIMEOUT_MS);
       page.setDefaultTimeout(TIMEOUT_MS);
 
-      // SSRF protection: intercept all requests and validate each URL
-      // Note: DNS rebinding mitigation is limited in browser-based rendering.
-      // We validate each request URL to block private IPs, but the browser
-      // performs its own DNS resolution which cannot be pinned.
+      // SSRF protection: intercept all requests and validate each URL.
+      // Note: DNS rebinding mitigation is limited in browser-based rendering
+      // since the browser performs its own DNS resolution.
       await page.route('**/*', async (route) => {
-        const resourceType = route.request().resourceType();
-
-        // Block heavy resource types not needed for text extraction
-        if (BLOCKED_RESOURCE_TYPES.has(resourceType)) {
+        if (BLOCKED_RESOURCE_TYPES.has(route.request().resourceType())) {
           await route.abort();
           return;
         }
-
         try {
           await validateUrl(route.request().url());
           await route.continue();
         } catch (e) {
-          if (e instanceof InvalidUrlError) {
-            await route.abort('blockedbyclient');
-          } else {
-            await route.abort();
-          }
+          await route.abort(e instanceof InvalidUrlError ? 'blockedbyclient' : undefined);
         }
       });
 

@@ -1,5 +1,6 @@
 import * as dns from 'node:dns/promises';
 import { InvalidUrlError } from './errors.js';
+import { MAX_URL_LENGTH } from '../config/constants.js';
 
 // Explicitly blocked cloud metadata IPs
 const BLOCKED_IPS = new Set(['168.63.129.16']);
@@ -52,7 +53,7 @@ export async function validateUrl(url: string): Promise<void> {
     throw new InvalidUrlError(url);
   }
 
-  if (url.length > 2048) {
+  if (url.length > MAX_URL_LENGTH) {
     throw new InvalidUrlError(url);
   }
 
