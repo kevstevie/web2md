@@ -1,16 +1,19 @@
 {
   "name": "web2md-mcp",
-  "version": "0.0.5",
+  "version": "0.1.0",
   "description": "MCP server that converts web pages to clean Markdown",
+  "type": "module",
+  "main": "./dist/index.js",
   "bin": {
-    "web2md-mcp": "./bin/cli.js"
+    "web2md-mcp": "./dist/index.js"
   },
   "scripts": {
-    "build": "./gradlew bootJar && find build/libs -name '*.jar' ! -name '*-plain.jar' -exec cp {} bin/web2md.jar \\;",
-    "prepublishOnly": "npm run build"
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "postinstall": "playwright install chromium --with-deps || true"
   },
   "files": [
-    "bin/"
+    "dist/"
   ],
   "keywords": [
     "mcp",
@@ -27,6 +30,18 @@
     "url": "https://github.com/kevstevie/web2md"
   },
   "engines": {
-    "node": ">=16"
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "cheerio": "^1.0.0",
+    "playwright": "^1.49.0",
+    "turndown": "^7.2.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/turndown": "^5.0.5",
+    "typescript": "^5.0.0"
   }
 }

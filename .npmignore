@@ -1,6 +1,5 @@
 *
-!bin/cli.js
-!bin/web2md.jar
+!dist/**
 !package.json
 !README.md
 !LICENSE
