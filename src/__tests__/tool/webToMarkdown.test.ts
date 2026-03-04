@@ -21,7 +21,11 @@ import { convertHtmlToMarkdown } from '../../converter/htmlToMarkdown.js';
 import { summarize } from '../../service/summarizer.js';
 import { webToMarkdownHandler } from '../../tool/webToMarkdown.js';
 
-const mockFetcher = { fetch: vi.fn() };
+class MockPlaywrightFetcher {
+  fetch = vi.fn();
+}
+
+const mockFetcher = new MockPlaywrightFetcher();
 const mockCreateFetcher = vi.mocked(createFetcher);
 const mockConvert = vi.mocked(convertHtmlToMarkdown);
 const mockSummarize = vi.mocked(summarize);
@@ -139,5 +143,75 @@ describe('webToMarkdownHandler — 제목 sanitization', () => {
     const headingLine = result.split('\n').find(l => l.startsWith('# '));
     expect(headingLine).toBeDefined();
     expect(headingLine).not.toContain('\n');
+  });
+});
+
+describe('webToMarkdownHandler — debug 로그', () => {
+  it('debug 옵션이 없으면 debug 로그를 포함하지 않음', async () => {
+    mockFetcher.fetch.mockResolvedValue(SAMPLE_HTML);
+    mockConvert.mockReturnValue({ title: 'Example', markdown: SAMPLE_CONTENT });
+
+    const result = await webToMarkdownHandler({ url: 'https://example.com' });
+
+    expect(result).not.toContain('[web2md-debug]');
+  });
+
+  it('debug=true면 사용자 응답에 런타임 로그 포함', async () => {
+    mockFetcher.fetch.mockResolvedValue(SAMPLE_HTML);
+    mockConvert.mockReturnValue({ title: 'Example', markdown: SAMPLE_CONTENT });
+
+    const result = await webToMarkdownHandler({ url: 'https://example.com/path?a=token', debug: true });
+
+    expect(result).toContain('[web2md-debug]');
+    expect(result).toContain('- url: https://example.com/path');
+    expect(result).not.toContain('a=token');
+    expect(result).toContain('- fetcher: MockPlaywrightFetcher');
+    expect(result).toContain('- status: success');
+    expect(result).toContain('# Example');
+  });
+
+  it('debug=true + summaryLevel이면 요약 결과와 로그 함께 반환', async () => {
+    mockFetcher.fetch.mockResolvedValue(SAMPLE_HTML);
+    mockConvert.mockReturnValue({ title: 'Example', markdown: SAMPLE_CONTENT });
+    mockSummarize.mockReturnValue('요약된 내용');
+
+    const result = await webToMarkdownHandler({ url: 'https://example.com', summaryLevel: 3, debug: true });
+
+    expect(result).toContain('[web2md-debug]');
+    expect(result).toContain('- summaryLevel: 3');
+    expect(result).toContain('요약된 내용');
+  });
+
+  it('debug=true + 에러면 상태/에러명 로그 포함', async () => {
+    mockFetcher.fetch.mockRejectedValue(new InvalidUrlError('ftp://bad'));
+
+    const result = await webToMarkdownHandler({ url: 'ftp://bad', debug: true });
+
+    expect(result).toContain('[web2md-debug]');
+    expect(result).toContain('- status: invalid_url');
+    expect(result).toContain('- error: InvalidUrlError');
+    expect(result).toContain('Error: The provided URL is invalid');
+  });
+
+  it('debug=true + FetchFailedError면 fetch_failed 상태를 포함', async () => {
+    mockFetcher.fetch.mockRejectedValue(new FetchFailedError('https://fail.com', new Error('timeout')));
+
+    const result = await webToMarkdownHandler({ url: 'https://fail.com', debug: true });
+
+    expect(result).toContain('[web2md-debug]');
+    expect(result).toContain('- status: fetch_failed');
+    expect(result).toContain('- error: FetchFailedError');
+    expect(result).toContain('Error: Failed to fetch the web page');
+  });
+
+  it('debug=true + 예상치 못한 에러면 unexpected_error 상태를 포함', async () => {
+    mockFetcher.fetch.mockRejectedValue(new Error('boom'));
+
+    const result = await webToMarkdownHandler({ url: 'https://example.com', debug: true });
+
+    expect(result).toContain('[web2md-debug]');
+    expect(result).toContain('- status: unexpected_error');
+    expect(result).toContain('- error: Error');
+    expect(result).toContain('Error: An unexpected error occurred');
   });
 });

@@ -168,8 +168,8 @@ Use `summaryLevel` to get an extractive summary instead of the full page — ide
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `url` | `String` | - | The URL of the web page to fetch (http/https only) |
-| `jsEnabled` | `Boolean` | `false` | Set to `true` for JavaScript-rendered SPA pages (requires Playwright) |
 | `summaryLevel` | `Int?` | `null` | Summary level: `1` (most concise) to `5` (most detailed). Omit for full content. |
+| `debug` | `Boolean?` | `false` | If `true`, prepends runtime debug logs (selected fetcher, status, elapsed time) to the returned text so MCP users can verify runtime behavior. |
 
 **Token usage guide / 토큰 사용량 가이드:**
 
@@ -223,7 +223,7 @@ web2md/
     │   ├── types.ts                # HtmlFetcher interface
     │   ├── staticFetcher.ts        # Node fetch() based static fetcher
     │   ├── playwrightFetcher.ts    # Playwright-based JS rendering fetcher
-    │   └── index.ts                # Factory: select fetcher by jsEnabled
+    │   └── index.ts                # Factory: auto-select fetcher by runtime availability
     ├── converter/
     │   └── htmlToMarkdown.ts       # cheerio cleanup + turndown conversion
     ├── service/
