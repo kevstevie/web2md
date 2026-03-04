@@ -82,6 +82,38 @@ describe('convertHtmlToMarkdown — 본문 추출 우선순위', () => {
     const { markdown } = convertHtmlToMarkdown(html);
     expect(markdown).toContain('body content');
   });
+
+  it('SPA — 시맨틱 태그 없을 때 텍스트 밀도 기반으로 본문 div 추출', () => {
+    const longText = '이산수학은 연속적이지 않은 이산적인 구조를 연구하는 수학의 한 분야입니다. '.repeat(8);
+    const html = `
+      <html><body>
+        <div id="app">
+          <div id="nav">
+            <a href="/a">링크A</a><a href="/b">링크B</a><a href="/c">링크C</a>
+            <a href="/d">링크D</a><a href="/e">링크E</a>
+          </div>
+          <div id="content"><p>${longText}</p></div>
+          <div id="footer"><a href="/policy">정책</a><a href="/contact">연락</a></div>
+        </div>
+      </body></html>`;
+    const { markdown } = convertHtmlToMarkdown(html);
+    expect(markdown).toContain('이산수학은');
+  });
+
+  it('SPA — 링크 밀도 높은 네비게이션 div는 본문으로 선택되지 않음', () => {
+    const longText = '실제 본문 내용입니다. 이 텍스트는 충분히 길어야 합니다. '.repeat(10);
+    const navLinks = Array.from({ length: 20 }, (_, i) => `<a href="/nav${i}">메뉴${i}</a>`).join('');
+    const html = `
+      <html><body>
+        <div id="app">
+          <div id="gnb">${navLinks}</div>
+          <div id="main-content"><p>${longText}</p></div>
+        </div>
+      </body></html>`;
+    const { markdown } = convertHtmlToMarkdown(html);
+    expect(markdown).toContain('실제 본문 내용');
+    expect(markdown).not.toMatch(/메뉴\d{1,2}.*메뉴\d{1,2}.*메뉴\d{1,2}/);
+  });
 });
 
 describe('convertHtmlToMarkdown — 마크다운 변환', () => {
