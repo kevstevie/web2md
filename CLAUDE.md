@@ -4,62 +4,66 @@
 
 ## 기술 스택
 
-- **Language**: Kotlin 1.9 / Java 17
-- **Framework**: Spring Boot 3.5
-- **MCP**: Spring AI 1.0.0 (`spring-ai-starter-mcp-server`)
-- **Transport**: STDIO (subprocess 방식)
-- **HTML Parsing**: Jsoup 1.18.3
-- **Markdown Conversion**: Flexmark 0.64.8 (`flexmark-html2md-converter`)
-- **Build**: Gradle (Kotlin DSL)
+- **Language**: TypeScript 5 / Node.js 18+
+- **MCP SDK**: `@modelcontextprotocol/sdk` (StdioServerTransport)
+- **HTML Parsing**: cheerio
+- **Markdown Conversion**: turndown
+- **JS 렌더링**: Playwright (설치된 경우 자동 사용)
+- **Build**: tsc
+- **Test**: vitest
 
 ## 프로젝트 구조
 
 ```
-src/main/kotlin/org/jj/web2md/
-├── Web2mdApplication.kt           # Spring Boot 진입점 (@ConfigurationPropertiesScan)
+src/
+├── index.ts                        # MCP 서버 진입점
 ├── config/
-│   ├── McpConfig.kt               # ToolCallbackProvider Bean 등록
-│   └── WebFetcherProperties.kt    # 설정 프로퍼티 (timeout, maxBodySize, userAgent)
+│   └── constants.ts                # 공유 상수 (timeout, maxBodySize 등)
 ├── tool/
-│   ├── HelloTool.kt               # 샘플 MCP Tool
-│   └── WebToMarkdownTool.kt       # 웹→마크다운 변환 MCP Tool
+│   └── webToMarkdown.ts            # MCP Tool 정의 및 핸들러
 ├── fetcher/
-│   └── HtmlFetcher.kt             # Jsoup URL fetch + URL 검증
+│   ├── types.ts                    # HtmlFetcher 인터페이스
+│   ├── staticFetcher.ts            # Node fetch() 기반 정적 fetcher
+│   ├── playwrightFetcher.ts        # Playwright 기반 JS 렌더링 fetcher
+│   └── index.ts                    # 팩토리: playwright 설치 여부 자동 감지
 ├── converter/
-│   └── HtmlToMarkdownConverter.kt # HTML 정리 + Markdown 변환
-└── exception/
-    └── Web2mdExceptions.kt        # InvalidUrlException, FetchFailedException
+│   └── htmlToMarkdown.ts           # cheerio 정리 + turndown 변환
+├── service/
+│   ├── summarizer.ts               # 섹션 기반 추출 요약
+│   ├── textRank.ts                 # TF-IDF + TextRank
+│   └── tokenizer/
+│       ├── types.ts
+│       ├── simpleTokenizer.ts      # 영어 토크나이저
+│       └── koreanTokenizer.ts      # 한국어 토크나이저
+└── utils/
+    ├── ssrf.ts                     # SSRF URL 검증
+    └── errors.ts                   # InvalidUrlError, FetchFailedError
 ```
 
 ## 빌드 & 실행
 
 ```bash
-./gradlew build        # 빌드
-./gradlew bootJar      # JAR 생성
-java -jar build/libs/web2md-0.0.1-SNAPSHOT.jar  # STDIO 모드로 실행
+npm install            # 의존성 설치 (postinstall로 Chromium 자동 설치 시도)
+npm run build          # TypeScript 빌드 → dist/
+npm start              # MCP 서버 실행 (STDIO)
+npm test               # 테스트 실행
+npm run test:coverage  # 커버리지 포함 테스트
 ```
 
-## MCP Tool 추가 방법
+## MCP Tool
 
-1. `tool/` 패키지에 `@Service` 클래스 생성
-2. 메서드에 `@Tool(description = "...")` 어노테이션 추가
-3. 파라미터에 `@ToolParam(description = "...")` 어노테이션 추가
-4. `McpConfig.kt`의 `toolCallbackProvider`에 등록
+### webToMarkdown
+- `url: string` — http/https URL (필수)
+- `summaryLevel?: 1|2|3|4|5` — 요약 레벨 (생략 시 전체 반환)
 
-```kotlin
-@Service
-class MyTool {
-    @Tool(description = "도구 설명")
-    fun myMethod(@ToolParam(description = "파라미터 설명") param: String): String {
-        return "결과"
-    }
-}
+Playwright 설치 여부는 자동 감지 (playwright npm 패키지 + Chromium 바이너리 모두 있어야 활성화).
+
+## 로컬 MCP 추가
+
+```bash
+# 빌드 후
+claude mcp add web2md-mcp node /path/to/web2md/dist/index.js
 ```
-
-## 주요 설정
-
-- `application.properties`: MCP 서버 설정 (STDIO, SYNC 모드)
-- `logback-spring.xml`: 로그를 stderr로 리다이렉트 (stdout은 JSON-RPC 전용)
 
 ## 코딩 컨벤션
 
@@ -69,4 +73,7 @@ class MyTool {
 
 ## 문서 관리
 
-- 프로젝트 변경시 README.md를 같이 수정한다.
+- 프로젝트 변경 시 README.md를 같이 수정한다.
+
+# currentDate
+Today's date is 2026-03-04.
