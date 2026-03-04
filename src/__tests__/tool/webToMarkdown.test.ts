@@ -31,7 +31,7 @@ const SAMPLE_HTML = '<html><head><title>Example</title></head><body><p>Hello</p>
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mockCreateFetcher.mockReturnValue(mockFetcher);
+  mockCreateFetcher.mockResolvedValue(mockFetcher);
 });
 
 describe('webToMarkdownHandler — 정상 변환', () => {
@@ -55,22 +55,13 @@ describe('webToMarkdownHandler — 정상 변환', () => {
     expect(result.startsWith('#')).toBe(false);
   });
 
-  it('jsEnabled=true이면 PlaywrightFetcher 사용', async () => {
-    mockFetcher.fetch.mockResolvedValue(SAMPLE_HTML);
-    mockConvert.mockReturnValue({ title: '', markdown: 'md' });
-
-    await webToMarkdownHandler({ url: 'https://example.com', jsEnabled: true });
-
-    expect(mockCreateFetcher).toHaveBeenCalledWith(true);
-  });
-
-  it('jsEnabled 기본값은 false', async () => {
+  it('playwright 여부에 따라 자동으로 fetcher 선택', async () => {
     mockFetcher.fetch.mockResolvedValue(SAMPLE_HTML);
     mockConvert.mockReturnValue({ title: '', markdown: 'md' });
 
     await webToMarkdownHandler({ url: 'https://example.com' });
 
-    expect(mockCreateFetcher).toHaveBeenCalledWith(false);
+    expect(mockCreateFetcher).toHaveBeenCalledWith();
   });
 });
 

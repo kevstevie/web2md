@@ -6,10 +6,6 @@ import { InvalidUrlError, FetchFailedError } from '../utils/errors.js';
 
 export const webToMarkdownInputSchema = z.object({
   url: z.string().describe('The URL of the web page to fetch (http/https only)'),
-  jsEnabled: z
-    .boolean()
-    .optional()
-    .describe('Set to true for JavaScript-rendered SPA pages (requires Playwright). Default: false'),
   summaryLevel: z
     .number()
     .int()
@@ -22,13 +18,13 @@ export const webToMarkdownInputSchema = z.object({
 export type WebToMarkdownInput = z.infer<typeof webToMarkdownInputSchema>;
 
 export async function webToMarkdownHandler(input: WebToMarkdownInput): Promise<string> {
-  const { url, jsEnabled = false, summaryLevel } = input;
+  const { url, summaryLevel } = input;
 
   // Log injection prevention: strip control characters
   const safeUrl = url.replace(/[\r\n\t]/g, '_');
 
   try {
-    const fetcher = createFetcher(jsEnabled);
+    const fetcher = await createFetcher();
     const html = await fetcher.fetch(url);
     const { title, markdown } = convertHtmlToMarkdown(html);
     // Sanitize title to prevent markdown/prompt injection
