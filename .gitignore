@@ -17,6 +17,10 @@ bin/web2md.jar
 !**/src/main/**/bin/
 !**/src/test/**/bin/
 
+### Node.js ###
+node_modules/
+dist/
+
 ### IntelliJ IDEA ###
 .idea
 *.iws
@@ -29,7 +33,6 @@ out/
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
-/dist/
 /nbdist/
 /.nb-gradle/
 
@@ -42,3 +45,4 @@ out/
 ### AI ###
 .claude
 .serena
+coverage/

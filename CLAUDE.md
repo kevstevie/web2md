@@ -1,72 +1,65 @@
-# web2md
+# CLAUDE.md
 
-웹 페이지를 마크다운으로 변환하는 MCP(Model Context Protocol) 서버.
+Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
 
-## 기술 스택
+**Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
 
-- **Language**: Kotlin 1.9 / Java 17
-- **Framework**: Spring Boot 3.5
-- **MCP**: Spring AI 1.0.0 (`spring-ai-starter-mcp-server`)
-- **Transport**: STDIO (subprocess 방식)
-- **HTML Parsing**: Jsoup 1.18.3
-- **Markdown Conversion**: Flexmark 0.64.8 (`flexmark-html2md-converter`)
-- **Build**: Gradle (Kotlin DSL)
+## 1. Think Before Coding
 
-## 프로젝트 구조
+**Don't assume. Don't hide confusion. Surface tradeoffs.**
 
+Before implementing:
+- State your assumptions explicitly. If uncertain, ask.
+- If multiple interpretations exist, present them - don't pick silently.
+- If a simpler approach exists, say so. Push back when warranted.
+- If something is unclear, stop. Name what's confusing. Ask.
+
+## 2. Simplicity First
+
+**Minimum code that solves the problem. Nothing speculative.**
+
+- No features beyond what was asked.
+- No abstractions for single-use code.
+- No "flexibility" or "configurability" that wasn't requested.
+- No error handling for impossible scenarios.
+- If you write 200 lines and it could be 50, rewrite it.
+
+Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
+
+## 3. Surgical Changes
+
+**Touch only what you must. Clean up only your own mess.**
+
+When editing existing code:
+- Don't "improve" adjacent code, comments, or formatting.
+- Don't refactor things that aren't broken.
+- Match existing style, even if you'd do it differently.
+- If you notice unrelated dead code, mention it - don't delete it.
+
+When your changes create orphans:
+- Remove imports/variables/functions that YOUR changes made unused.
+- Don't remove pre-existing dead code unless asked.
+
+The test: Every changed line should trace directly to the user's request.
+
+## 4. Goal-Driven Execution
+
+**Define success criteria. Loop until verified.**
+
+Transform tasks into verifiable goals:
+- "Add validation" → "Write tests for invalid inputs, then make them pass"
+- "Fix the bug" → "Write a test that reproduces it, then make it pass"
+- "Refactor X" → "Ensure tests pass before and after"
+
+For multi-step tasks, state a brief plan:
 ```
-src/main/kotlin/org/jj/web2md/
-├── Web2mdApplication.kt           # Spring Boot 진입점 (@ConfigurationPropertiesScan)
-├── config/
-│   ├── McpConfig.kt               # ToolCallbackProvider Bean 등록
-│   └── WebFetcherProperties.kt    # 설정 프로퍼티 (timeout, maxBodySize, userAgent)
-├── tool/
-│   ├── HelloTool.kt               # 샘플 MCP Tool
-│   └── WebToMarkdownTool.kt       # 웹→마크다운 변환 MCP Tool
-├── fetcher/
-│   └── HtmlFetcher.kt             # Jsoup URL fetch + URL 검증
-├── converter/
-│   └── HtmlToMarkdownConverter.kt # HTML 정리 + Markdown 변환
-└── exception/
-    └── Web2mdExceptions.kt        # InvalidUrlException, FetchFailedException
+1. [Step] → verify: [check]
+2. [Step] → verify: [check]
+3. [Step] → verify: [check]
 ```
 
-## 빌드 & 실행
+Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
-```bash
-./gradlew build        # 빌드
-./gradlew bootJar      # JAR 생성
-java -jar build/libs/web2md-0.0.1-SNAPSHOT.jar  # STDIO 모드로 실행
-```
+---
 
-## MCP Tool 추가 방법
-
-1. `tool/` 패키지에 `@Service` 클래스 생성
-2. 메서드에 `@Tool(description = "...")` 어노테이션 추가
-3. 파라미터에 `@ToolParam(description = "...")` 어노테이션 추가
-4. `McpConfig.kt`의 `toolCallbackProvider`에 등록
-
-```kotlin
-@Service
-class MyTool {
-    @Tool(description = "도구 설명")
-    fun myMethod(@ToolParam(description = "파라미터 설명") param: String): String {
-        return "결과"
-    }
-}
-```
-
-## 주요 설정
-
-- `application.properties`: MCP 서버 설정 (STDIO, SYNC 모드)
-- `logback-spring.xml`: 로그를 stderr로 리다이렉트 (stdout은 JSON-RPC 전용)
-
-## 코딩 컨벤션
-
-- 커밋 메시지: `<type>: <description>` (feat, fix, refactor, docs, test, chore)
-- 불변성 패턴 사용
-- 파일당 800줄 이하, 함수당 50줄 이하
-
-## 문서 관리
-
-- 프로젝트 변경시 README.md를 같이 수정한다.
+**These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
