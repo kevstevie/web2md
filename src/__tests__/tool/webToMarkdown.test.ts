@@ -73,7 +73,7 @@ describe('webToMarkdownHandler — summaryLevel', () => {
   it('summaryLevel 지정 시 요약 결과 반환', async () => {
     mockFetcher.fetch.mockResolvedValue(SAMPLE_HTML);
     mockConvert.mockReturnValue({ title: 'Example', markdown: SAMPLE_CONTENT });
-    mockSummarize.mockReturnValue('요약된 내용');
+    mockSummarize.mockResolvedValue('요약된 내용');
 
     const result = await webToMarkdownHandler({ url: 'https://example.com', summaryLevel: 3 });
 
@@ -84,7 +84,7 @@ describe('webToMarkdownHandler — summaryLevel', () => {
   it('summaryLevel=1 은 최소 요약 호출', async () => {
     mockFetcher.fetch.mockResolvedValue(SAMPLE_HTML);
     mockConvert.mockReturnValue({ title: 'Test', markdown: SAMPLE_CONTENT });
-    mockSummarize.mockReturnValue('매우 짧은 요약');
+    mockSummarize.mockResolvedValue('매우 짧은 요약');
 
     const result = await webToMarkdownHandler({ url: 'https://example.com', summaryLevel: 1 });
 
@@ -173,7 +173,7 @@ describe('webToMarkdownHandler — debug 로그', () => {
   it('debug=true + summaryLevel이면 요약 결과와 로그 함께 반환', async () => {
     mockFetcher.fetch.mockResolvedValue(SAMPLE_HTML);
     mockConvert.mockReturnValue({ title: 'Example', markdown: SAMPLE_CONTENT });
-    mockSummarize.mockReturnValue('요약된 내용');
+    mockSummarize.mockResolvedValue('요약된 내용');
 
     const result = await webToMarkdownHandler({ url: 'https://example.com', summaryLevel: 3, debug: true });
 

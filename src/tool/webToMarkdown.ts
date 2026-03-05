@@ -74,7 +74,7 @@ export async function webToMarkdownHandler(input: WebToMarkdownInput): Promise<s
     // Sanitize title to prevent markdown/prompt injection
     const safeTitle = title.replace(/[\r\n]/g, ' ').trim();
     const fullMarkdown = safeTitle ? `# ${safeTitle}\n\n${markdown}` : markdown;
-    const resultText = summaryLevel != null ? summarize(fullMarkdown, summaryLevel) : fullMarkdown;
+    const resultText = summaryLevel != null ? await summarize(fullMarkdown, summaryLevel) : fullMarkdown;
 
     return withDebugLog(
       resultText,

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { rankSentences } from '../../service/textRank.js';
 import { SimpleTokenizer } from '../../service/tokenizer/simpleTokenizer.js';
-import { KoreanTokenizer } from '../../service/tokenizer/koreanTokenizer.js';
+import { getKoreanTokenizer } from '../../service/tokenizer/koreanTokenizer.js';
 
 const tokenizer = new SimpleTokenizer();
 
@@ -54,8 +54,8 @@ describe('rankSentences — 주제 중요도', () => {
     expect(topThreeRanks.every(r => r < weatherRank)).toBe(true);
   });
 
-  it('한국어 문장 주제 중요도', () => {
-    const koreanTokenizer = new KoreanTokenizer();
+  it('한국어 문장 주제 중요도', async () => {
+    const koreanTokenizer = await getKoreanTokenizer();
     const sentences = [
       '인공지능은 현대 기술의 핵심 분야이다.',
       '인공지능과 머신러닝은 데이터를 기반으로 학습한다.',

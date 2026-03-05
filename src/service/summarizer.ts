@@ -1,6 +1,6 @@
 import { rankSentences } from './textRank.js';
 import { SimpleTokenizer } from './tokenizer/simpleTokenizer.js';
-import { KoreanTokenizer } from './tokenizer/koreanTokenizer.js';
+import { getKoreanTokenizer } from './tokenizer/koreanTokenizer.js';
 import type { Tokenizer } from './tokenizer/types.js';
 
 const MIN_SUMMARY_SENTENCES = 3;
@@ -38,9 +38,9 @@ function levelToTopPercent(level: number): number {
   }
 }
 
-function detectTokenizer(text: string): Tokenizer {
+async function detectTokenizer(text: string): Promise<Tokenizer> {
   const koreanRatio = (text.match(KOREAN_CHAR) ?? []).length / Math.max(text.length, 1);
-  return koreanRatio > 0.1 ? new KoreanTokenizer() : new SimpleTokenizer();
+  return koreanRatio > 0.1 ? getKoreanTokenizer() : new SimpleTokenizer();
 }
 
 interface Section {
@@ -135,7 +135,7 @@ function buildStructureOnly(sections: Section[], maxChars: number): string {
   return result.trim();
 }
 
-export function summarize(markdown: string, level: number = 3): string {
+export async function summarize(markdown: string, level: number = 3): Promise<string> {
   const maxChars = levelToMaxChars(level);
   const topPercent = levelToTopPercent(level);
 
@@ -156,7 +156,7 @@ export function summarize(markdown: string, level: number = 3): string {
 
   // Extract sentences once, reuse for tokenizer detection and ranking
   const sentences = indexed.map(([, s]) => s);
-  const tokenizer = detectTokenizer(sentences.join(' '));
+  const tokenizer = await detectTokenizer(sentences.join(' '));
   const topK = Math.max(MIN_SUMMARY_SENTENCES, Math.floor(indexed.length * topPercent / 100));
 
   const rankedIndices = rankSentences(sentences, tokenizer).slice(0, topK);
