@@ -1,9 +1,9 @@
 import { describe, it, expect, vi } from 'vitest';
 
-// lightpanda 없음 → Playwright 사용 경로
+// lightpanda 있음 → LightpandaFetcher 사용 경로
 vi.mock('node:child_process', () => ({
   execFile: (_cmd: string, _args: string[], cb: (err: Error | null) => void) => {
-    cb(new Error('not found'));
+    cb(null); // lightpanda version 성공
   },
   promisify: (fn: unknown) => fn,
 }));
@@ -11,7 +11,7 @@ vi.mock('node:child_process', () => ({
 vi.mock('node:util', () => ({
   promisify: (fn: (...args: unknown[]) => void) =>
     (...args: unknown[]) =>
-      new Promise((_resolve, reject) => fn(...args, (err: Error | null) => err ? reject(err) : _resolve(undefined))),
+      new Promise((resolve, reject) => fn(...args, (err: Error | null) => err ? reject(err) : resolve(undefined))),
 }));
 
 vi.mock('../../fetcher/staticFetcher.js', () => ({
@@ -27,17 +27,12 @@ vi.mock('../../fetcher/lightpandaFetcher.js', () => ({
 }));
 
 import { createFetcher } from '../../fetcher/index.js';
-import { PlaywrightFetcher } from '../../fetcher/playwrightFetcher.js';
+import { LightpandaFetcher } from '../../fetcher/lightpandaFetcher.js';
 
-describe('createFetcher — lightpanda 없음, playwright 있음', () => {
-  it('Promise<HtmlFetcher>를 반환함', async () => {
+describe('createFetcher — lightpanda 있음', () => {
+  it('LightpandaFetcher를 최우선으로 반환', async () => {
     const fetcher = await createFetcher();
-    expect(typeof fetcher.fetch).toBe('function');
-  });
-
-  it('playwright 설치 환경에서 PlaywrightFetcher 반환', async () => {
-    const fetcher = await createFetcher();
-    expect(fetcher).toBeInstanceOf(PlaywrightFetcher);
+    expect(fetcher).toBeInstanceOf(LightpandaFetcher);
   });
 
   it('동일 인스턴스 반환 (memoized)', async () => {
