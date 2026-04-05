@@ -1,0 +1,49 @@
+import { spawn } from 'node:child_process';
+import { validateUrl } from '../utils/ssrf.js';
+import { FetchFailedError, InvalidUrlError } from '../utils/errors.js';
+import { MAX_URL_LENGTH, TIMEOUT_MS } from '../config/constants.js';
+import type { HtmlFetcher } from './types.js';
+
+export class LightpandaFetcher implements HtmlFetcher {
+  async fetch(url: string): Promise<string> {
+    if (url.length > MAX_URL_LENGTH) throw new InvalidUrlError(url);
+    await validateUrl(url);
+
+    return new Promise((resolve, reject) => {
+      const proc = spawn('lightpanda', [
+        'fetch',
+        '--dump', 'html',
+        '--strip-mode', 'js,css',
+        '--wait-until', 'domcontentloaded',
+        '--wait-ms', String(TIMEOUT_MS),
+        url,
+      ]);
+
+      const chunks: Buffer[] = [];
+      const errChunks: Buffer[] = [];
+
+      proc.stdout.on('data', (chunk: Buffer) => chunks.push(chunk));
+      proc.stderr.on('data', (chunk: Buffer) => errChunks.push(chunk));
+
+      const timer = setTimeout(() => {
+        proc.kill();
+        reject(new FetchFailedError(url, new Error('lightpanda fetch timed out')));
+      }, TIMEOUT_MS + 2_000);
+
+      proc.on('close', (code) => {
+        clearTimeout(timer);
+        if (code === 0) {
+          resolve(Buffer.concat(chunks).toString('utf-8'));
+        } else {
+          const stderr = Buffer.concat(errChunks).toString('utf-8');
+          reject(new FetchFailedError(url, new Error(stderr || `lightpanda exited with code ${code}`)));
+        }
+      });
+
+      proc.on('error', (e) => {
+        clearTimeout(timer);
+        reject(new FetchFailedError(url, e));
+      });
+    });
+  }
+}
