@@ -1,6 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { EventEmitter } from 'node:events';
 import { InvalidUrlError, FetchFailedError } from '../../utils/errors.js';
+import { TIMEOUT_MS } from '../../config/constants.js';
 
 vi.mock('node:dns/promises', () => ({
   resolve4: vi.fn().mockResolvedValue(['93.184.216.34']),
@@ -127,5 +128,26 @@ describe('LightpandaFetcher — 오류 처리', () => {
       fetcher.fetch('https://example.com'),
       emitError(new Error('ENOENT: lightpanda not found')),
     ])).rejects.toThrow(FetchFailedError);
+  });
+});
+
+describe('LightpandaFetcher — 타임아웃', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('TIMEOUT_MS 초과 시 proc.kill 호출 후 FetchFailedError', async () => {
+    vi.useFakeTimers();
+
+    const fetchPromise = fetcher.fetch('https://example.com');
+
+    // t=0: DNS Promise.allSettled 마이크로태스크 완료 + spawn 후 타이머 등록 대기
+    await vi.advanceTimersByTimeAsync(0);
+
+    // TIMEOUT_MS 경과 → settle 콜백 실행
+    await vi.advanceTimersByTimeAsync(TIMEOUT_MS);
+
+    await expect(fetchPromise).rejects.toThrow(FetchFailedError);
+    expect(mockProc.kill).toHaveBeenCalledWith('SIGKILL');
   });
 });
