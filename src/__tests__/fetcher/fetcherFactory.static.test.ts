@@ -1,6 +1,6 @@
 // lightpanda 없음 + playwright 없음 → StaticFetcher 사용 경로
 vi.mock('node:child_process', () => ({
-  execFile: (_cmd: string, _args: string[], cb: (err: Error | null) => void) => {
+  execFile: (_cmd: string, _args: string[], _opts: unknown, cb: (err: Error | null) => void) => {
     cb(new Error('not found'));
   },
 }));

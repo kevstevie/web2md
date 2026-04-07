@@ -10,7 +10,7 @@ const execFileAsync = promisify(execFile);
 
 async function isLightpandaAvailable(): Promise<boolean> {
   try {
-    await execFileAsync('lightpanda', ['version']);
+    await execFileAsync('lightpanda', ['version'], { timeout: 3_000 });
     return true;
   } catch {
     return false;

@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // lightpanda 있음 → LightpandaFetcher 사용 경로
 vi.mock('node:child_process', () => ({
-  execFile: (_cmd: string, _args: string[], cb: (err: Error | null) => void) => {
+  execFile: (_cmd: string, _args: string[], _opts: unknown, cb: (err: Error | null) => void) => {
     cb(null); // lightpanda version 성공
   },
   promisify: (fn: unknown) => fn,
