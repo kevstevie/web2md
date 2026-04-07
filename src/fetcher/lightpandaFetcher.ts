@@ -15,7 +15,7 @@ export class LightpandaFetcher implements HtmlFetcher {
         '--dump', 'html',
         '--strip-mode', 'js,css',
         '--wait-until', 'domcontentloaded',
-        '--wait-ms', String(TIMEOUT_MS),
+        '--wait-ms', String(Math.max(TIMEOUT_MS - 3_000, 1_000)),
         url,
       ]);
 
@@ -35,7 +35,7 @@ export class LightpandaFetcher implements HtmlFetcher {
       timer = setTimeout(() => settle(() => {
         try { proc.kill('SIGKILL'); } catch { /* already gone */ }
         reject(new FetchFailedError(url, new Error('lightpanda fetch timed out')));
-      }), TIMEOUT_MS + 2_000);
+      }), TIMEOUT_MS);
 
       proc.stdout.on('data', (chunk: Buffer) => {
         totalSize += chunk.length;
