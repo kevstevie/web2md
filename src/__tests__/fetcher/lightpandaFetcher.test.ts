@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { EventEmitter } from 'node:events';
 import { InvalidUrlError, FetchFailedError } from '../../utils/errors.js';
-import { TIMEOUT_MS } from '../../config/constants.js';
+import { TIMEOUT_MS, MAX_BODY_SIZE_BYTES } from '../../config/constants.js';
 
 vi.mock('node:dns/promises', () => ({
   resolve4: vi.fn().mockResolvedValue(['93.184.216.34']),
@@ -105,6 +105,18 @@ describe('LightpandaFetcher — SSRF 차단', () => {
     const longUrl = 'https://example.com/?' + 'a'.repeat(2050);
     await expect(fetcher.fetch(longUrl)).rejects.toThrow(InvalidUrlError);
     expect(spawn).not.toHaveBeenCalled();
+  });
+});
+
+describe('LightpandaFetcher — 크기 제한', () => {
+  it('MAX_BODY_SIZE_BYTES 초과 시 FetchFailedError + proc.kill 호출', async () => {
+    const fetchPromise = fetcher.fetch('https://example.com');
+    await new Promise<void>(resolve => setTimeout(() => {
+      mockProc.stdout.emit('data', Buffer.alloc(MAX_BODY_SIZE_BYTES + 1));
+      resolve();
+    }, 0));
+    await expect(fetchPromise).rejects.toThrow(FetchFailedError);
+    expect(mockProc.kill).toHaveBeenCalledWith('SIGKILL');
   });
 });
 
