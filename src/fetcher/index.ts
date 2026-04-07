@@ -17,22 +17,32 @@ async function isLightpandaAvailable(): Promise<boolean> {
   }
 }
 
-// Probe once at module load; result is memoized for all subsequent calls.
 // Priority: Lightpanda > Playwright/Chromium > Static
-const _fetcher: Promise<HtmlFetcher> = isLightpandaAvailable()
-  .then((available) => {
-    if (available) return new LightpandaFetcher() as HtmlFetcher;
-    return import('playwright').then(({ chromium }) => {
-      if (!existsSync(chromium.executablePath())) {
-        throw new Error('Chromium not installed');
-      }
-      return new PlaywrightFetcher() as HtmlFetcher;
-    });
-  })
-  .catch(() => new StaticFetcher());
+// Resolved lazily on first call; subsequent calls return the memoized promise.
+let _fetcher: Promise<HtmlFetcher> | null = null;
+
+function buildFetcher(): Promise<HtmlFetcher> {
+  return isLightpandaAvailable()
+    .then((available) => {
+      if (available) return new LightpandaFetcher() as HtmlFetcher;
+      return import('playwright').then(({ chromium }) => {
+        if (!existsSync(chromium.executablePath())) {
+          throw new Error('Chromium not installed');
+        }
+        return new PlaywrightFetcher() as HtmlFetcher;
+      });
+    })
+    .catch(() => new StaticFetcher());
+}
 
 export function createFetcher(): Promise<HtmlFetcher> {
+  if (!_fetcher) _fetcher = buildFetcher();
   return _fetcher;
+}
+
+/** Reset memoized fetcher — for use in tests only. */
+export function _resetFetcher(): void {
+  _fetcher = null;
 }
 
 export type { HtmlFetcher };
