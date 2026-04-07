@@ -1,7 +1,7 @@
 import { spawn } from 'node:child_process';
 import { validateUrl } from '../utils/ssrf.js';
 import { FetchFailedError, InvalidUrlError } from '../utils/errors.js';
-import { MAX_URL_LENGTH, TIMEOUT_MS } from '../config/constants.js';
+import { MAX_URL_LENGTH, TIMEOUT_MS, MAX_BODY_SIZE_BYTES } from '../config/constants.js';
 import type { HtmlFetcher } from './types.js';
 
 export class LightpandaFetcher implements HtmlFetcher {
@@ -21,10 +21,7 @@ export class LightpandaFetcher implements HtmlFetcher {
 
       const chunks: Buffer[] = [];
       const errChunks: Buffer[] = [];
-
-      proc.stdout.on('data', (chunk: Buffer) => chunks.push(chunk));
-      proc.stderr.on('data', (chunk: Buffer) => errChunks.push(chunk));
-
+      let totalSize = 0;
       let timer: ReturnType<typeof setTimeout>;
       let settled = false;
 
@@ -39,6 +36,19 @@ export class LightpandaFetcher implements HtmlFetcher {
         try { proc.kill('SIGKILL'); } catch { /* already gone */ }
         reject(new FetchFailedError(url, new Error('lightpanda fetch timed out')));
       }), TIMEOUT_MS + 2_000);
+
+      proc.stdout.on('data', (chunk: Buffer) => {
+        totalSize += chunk.length;
+        if (totalSize > MAX_BODY_SIZE_BYTES) {
+          settle(() => {
+            try { proc.kill('SIGKILL'); } catch { /* already gone */ }
+            reject(new FetchFailedError(url, new Error('Response too large')));
+          });
+          return;
+        }
+        chunks.push(chunk);
+      });
+      proc.stderr.on('data', (chunk: Buffer) => errChunks.push(chunk));
 
       proc.on('close', (code) => settle(() => {
         if (code === 0) {
