@@ -25,25 +25,31 @@ export class LightpandaFetcher implements HtmlFetcher {
       proc.stdout.on('data', (chunk: Buffer) => chunks.push(chunk));
       proc.stderr.on('data', (chunk: Buffer) => errChunks.push(chunk));
 
-      const timer = setTimeout(() => {
-        proc.kill();
-        reject(new FetchFailedError(url, new Error('lightpanda fetch timed out')));
-      }, TIMEOUT_MS + 2_000);
+      let timer: ReturnType<typeof setTimeout>;
+      let settled = false;
 
-      proc.on('close', (code) => {
+      const settle = (fn: () => void) => {
+        if (settled) return;
+        settled = true;
         clearTimeout(timer);
+        fn();
+      };
+
+      timer = setTimeout(() => settle(() => {
+        try { proc.kill('SIGKILL'); } catch { /* already gone */ }
+        reject(new FetchFailedError(url, new Error('lightpanda fetch timed out')));
+      }), TIMEOUT_MS + 2_000);
+
+      proc.on('close', (code) => settle(() => {
         if (code === 0) {
           resolve(Buffer.concat(chunks).toString('utf-8'));
         } else {
           const stderr = Buffer.concat(errChunks).toString('utf-8');
           reject(new FetchFailedError(url, new Error(stderr || `lightpanda exited with code ${code}`)));
         }
-      });
+      }));
 
-      proc.on('error', (e) => {
-        clearTimeout(timer);
-        reject(new FetchFailedError(url, e));
-      });
+      proc.on('error', (e) => settle(() => reject(new FetchFailedError(url, e))));
     });
   }
 }
