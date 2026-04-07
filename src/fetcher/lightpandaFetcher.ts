@@ -1,12 +1,11 @@
 import { spawn } from 'node:child_process';
 import { validateUrl } from '../utils/ssrf.js';
-import { FetchFailedError, InvalidUrlError } from '../utils/errors.js';
-import { MAX_URL_LENGTH, TIMEOUT_MS, MAX_BODY_SIZE_BYTES } from '../config/constants.js';
+import { FetchFailedError } from '../utils/errors.js';
+import { TIMEOUT_MS, MAX_BODY_SIZE_BYTES } from '../config/constants.js';
 import type { HtmlFetcher } from './types.js';
 
 export class LightpandaFetcher implements HtmlFetcher {
   async fetch(url: string): Promise<string> {
-    if (url.length > MAX_URL_LENGTH) throw new InvalidUrlError(url);
     await validateUrl(url);
 
     return new Promise((resolve, reject) => {
