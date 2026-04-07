@@ -33,8 +33,16 @@ export class LightpandaFetcher implements HtmlFetcher {
         fn();
       };
 
+      const killProc = () => {
+        try {
+          proc.kill('SIGKILL');
+        } catch (e: unknown) {
+          if ((e as NodeJS.ErrnoException).code !== 'ESRCH') throw e;
+        }
+      };
+
       timer = setTimeout(() => settle(() => {
-        try { proc.kill('SIGKILL'); } catch { /* already gone */ }
+        killProc();
         reject(new FetchFailedError(url, new Error('lightpanda fetch timed out')));
       }), TIMEOUT_MS);
 
@@ -42,7 +50,7 @@ export class LightpandaFetcher implements HtmlFetcher {
         totalSize += chunk.length;
         if (totalSize > MAX_BODY_SIZE_BYTES) {
           settle(() => {
-            try { proc.kill('SIGKILL'); } catch { /* already gone */ }
+            killProc();
             reject(new FetchFailedError(url, new Error('Response too large')));
           });
           return;
