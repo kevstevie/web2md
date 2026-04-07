@@ -1,3 +1,5 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
 // lightpanda 없음 + playwright 없음 → StaticFetcher 사용 경로
 vi.mock('node:child_process', () => ({
   execFile: (_cmd: string, _args: string[], _opts: unknown, cb: (err: Error | null) => void) => {
@@ -25,7 +27,6 @@ vi.mock('../../fetcher/lightpandaFetcher.js', () => ({
 
 vi.mock('playwright', () => { throw new Error('playwright not installed'); });
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { createFetcher, _resetFetcher } from '../../fetcher/index.js';
 import { StaticFetcher } from '../../fetcher/staticFetcher.js';
 

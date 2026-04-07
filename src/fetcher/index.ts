@@ -32,6 +32,7 @@ function buildFetcher(): Promise<HtmlFetcher> {
         return new PlaywrightFetcher() as HtmlFetcher;
       });
     })
+    // Playwright unavailable (not installed or Chromium missing) → fall back to static.
     .catch(() => new StaticFetcher());
 }
 

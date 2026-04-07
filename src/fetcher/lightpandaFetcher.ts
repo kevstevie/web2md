@@ -1,7 +1,7 @@
 import { spawn } from 'node:child_process';
 import { validateUrl } from '../utils/ssrf.js';
 import { FetchFailedError } from '../utils/errors.js';
-import { TIMEOUT_MS, MAX_BODY_SIZE_BYTES } from '../config/constants.js';
+import { TIMEOUT_MS, MAX_BODY_SIZE_BYTES, MAX_STDERR_BYTES } from '../config/constants.js';
 import type { HtmlFetcher } from './types.js';
 
 export class LightpandaFetcher implements HtmlFetcher {
@@ -22,8 +22,7 @@ export class LightpandaFetcher implements HtmlFetcher {
       const errChunks: Buffer[] = [];
       let totalSize = 0;
       let errSize = 0;
-      const MAX_STDERR_BYTES = 64 * 1024;
-      let timer: ReturnType<typeof setTimeout>;
+      let timer: ReturnType<typeof setTimeout> | undefined;
       let settled = false;
 
       const settle = (fn: () => void) => {
