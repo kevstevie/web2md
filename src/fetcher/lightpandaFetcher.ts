@@ -21,6 +21,8 @@ export class LightpandaFetcher implements HtmlFetcher {
       const chunks: Buffer[] = [];
       const errChunks: Buffer[] = [];
       let totalSize = 0;
+      let errSize = 0;
+      const MAX_STDERR_BYTES = 64 * 1024;
       let timer: ReturnType<typeof setTimeout>;
       let settled = false;
 
@@ -47,7 +49,12 @@ export class LightpandaFetcher implements HtmlFetcher {
         }
         chunks.push(chunk);
       });
-      proc.stderr.on('data', (chunk: Buffer) => errChunks.push(chunk));
+      proc.stderr.on('data', (chunk: Buffer) => {
+        const remaining = MAX_STDERR_BYTES - errSize;
+        if (remaining <= 0) return;
+        errChunks.push(chunk.subarray(0, remaining));
+        errSize += chunk.length;
+      });
 
       proc.on('close', (code) => settle(() => {
         if (code === 0) {
