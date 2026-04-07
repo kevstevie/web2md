@@ -25,9 +25,11 @@ vi.mock('../../fetcher/lightpandaFetcher.js', () => ({
 
 vi.mock('playwright', () => { throw new Error('playwright not installed'); });
 
-import { describe, it, expect, vi } from 'vitest';
-import { createFetcher } from '../../fetcher/index.js';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { createFetcher, _resetFetcher } from '../../fetcher/index.js';
 import { StaticFetcher } from '../../fetcher/staticFetcher.js';
+
+beforeEach(() => _resetFetcher());
 
 describe('createFetcher — lightpanda 없음, playwright 없음', () => {
   it('StaticFetcher로 fallback', async () => {

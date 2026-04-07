@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // lightpanda 없음 → Playwright 사용 경로
 vi.mock('node:child_process', () => ({
@@ -26,8 +26,10 @@ vi.mock('../../fetcher/lightpandaFetcher.js', () => ({
   LightpandaFetcher: class { fetch = vi.fn(); },
 }));
 
-import { createFetcher } from '../../fetcher/index.js';
+import { createFetcher, _resetFetcher } from '../../fetcher/index.js';
 import { PlaywrightFetcher } from '../../fetcher/playwrightFetcher.js';
+
+beforeEach(() => _resetFetcher());
 
 describe('createFetcher — lightpanda 없음, playwright 있음', () => {
   it('Promise<HtmlFetcher>를 반환함', async () => {
