@@ -1,7 +1,7 @@
 import { spawn } from 'node:child_process';
 import { validateUrl } from '../utils/ssrf.js';
 import { FetchFailedError } from '../utils/errors.js';
-import { TIMEOUT_MS, MAX_BODY_SIZE_BYTES, MAX_STDERR_BYTES } from '../config/constants.js';
+import { TIMEOUT_MS, MAX_BODY_SIZE_BYTES, MAX_STDERR_BYTES, LIGHTPANDA_STRIP_MODE } from '../config/constants.js';
 import type { HtmlFetcher } from './types.js';
 
 export class LightpandaFetcher implements HtmlFetcher {
@@ -12,7 +12,7 @@ export class LightpandaFetcher implements HtmlFetcher {
       const proc = spawn('lightpanda', [
         'fetch',
         '--dump', 'html',
-        '--strip-mode', 'js,css',
+        '--strip-mode', LIGHTPANDA_STRIP_MODE,
         '--wait-until', 'domcontentloaded',
         '--wait-ms', String(Math.max(TIMEOUT_MS - 3_000, 1_000)),
         url,
