@@ -25,7 +25,7 @@ vi.mock('../../fetcher/lightpandaFetcher.js', () => ({
   LightpandaFetcher: class { fetch = vi.fn(); },
 }));
 
-vi.mock('playwright', () => { throw new Error('playwright not installed'); });
+vi.mock('playwright', async () => { throw new Error('playwright not installed'); });
 
 import { createFetcher, _resetFetcher } from '../../fetcher/index.js';
 import { StaticFetcher } from '../../fetcher/staticFetcher.js';
