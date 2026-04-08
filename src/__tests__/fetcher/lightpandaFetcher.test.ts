@@ -109,10 +109,23 @@ describe('LightpandaFetcher — SSRF 차단', () => {
 });
 
 describe('LightpandaFetcher — 크기 제한', () => {
-  it('MAX_BODY_SIZE_BYTES 초과 시 FetchFailedError + proc.kill 호출', async () => {
+  it('단일 청크로 MAX_BODY_SIZE_BYTES 초과 시 FetchFailedError + proc.kill 호출', async () => {
     const fetchPromise = fetcher.fetch('https://example.com');
     await new Promise<void>(resolve => setTimeout(() => {
       mockProc.stdout.emit('data', Buffer.alloc(MAX_BODY_SIZE_BYTES + 1));
+      resolve();
+    }, 0));
+    await expect(fetchPromise).rejects.toThrow(FetchFailedError);
+    expect(mockProc.kill).toHaveBeenCalledWith('SIGKILL');
+  });
+
+  it('여러 청크 누적으로 MAX_BODY_SIZE_BYTES 초과 시 FetchFailedError + proc.kill 호출', async () => {
+    const fetchPromise = fetcher.fetch('https://example.com');
+    await new Promise<void>(resolve => setTimeout(() => {
+      const halfSize = Math.floor(MAX_BODY_SIZE_BYTES / 2);
+      mockProc.stdout.emit('data', Buffer.alloc(halfSize));
+      mockProc.stdout.emit('data', Buffer.alloc(halfSize));
+      mockProc.stdout.emit('data', Buffer.alloc(halfSize)); // 세 번째로 초과
       resolve();
     }, 0));
     await expect(fetchPromise).rejects.toThrow(FetchFailedError);
