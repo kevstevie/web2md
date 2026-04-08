@@ -35,6 +35,7 @@ export class LightpandaFetcher implements HtmlFetcher {
 
       const settleError = (fn: () => void) => settle(() => {
         chunks.length = 0;
+        errChunks.length = 0;
         fn();
       });
 
@@ -70,15 +71,14 @@ export class LightpandaFetcher implements HtmlFetcher {
         errSize += toStore.length;
       });
 
-      proc.on('close', (code) => settle(() => {
+      proc.on('close', (code) => {
         if (code === 0) {
-          resolve(Buffer.concat(chunks).toString('utf-8'));
+          settle(() => resolve(Buffer.concat(chunks).toString('utf-8')));
         } else {
-          chunks.length = 0;
           const stderr = Buffer.concat(errChunks).toString('utf-8');
-          reject(new FetchFailedError(url, new Error(stderr || `lightpanda exited with code ${code}`)));
+          settleError(() => reject(new FetchFailedError(url, new Error(stderr || `lightpanda exited with code ${code}`))));
         }
-      }));
+      });
 
       proc.on('error', (e) => settleError(() => reject(new FetchFailedError(url, e))));
     });
