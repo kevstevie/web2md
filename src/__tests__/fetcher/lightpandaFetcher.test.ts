@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { EventEmitter } from 'node:events';
 import { InvalidUrlError, FetchFailedError } from '../../utils/errors.js';
-import { TIMEOUT_MS, MAX_BODY_SIZE_BYTES } from '../../config/constants.js';
+import { TIMEOUT_MS, MAX_BODY_SIZE_BYTES, MAX_STDERR_BYTES } from '../../config/constants.js';
 
 vi.mock('node:dns/promises', () => ({
   resolve4: vi.fn().mockResolvedValue(['93.184.216.34']),
@@ -140,6 +140,25 @@ describe('LightpandaFetcher — 오류 처리', () => {
       fetcher.fetch('https://example.com'),
       emitError(new Error('ENOENT: lightpanda not found')),
     ])).rejects.toThrow(FetchFailedError);
+  });
+});
+
+describe('LightpandaFetcher — stderr 캡', () => {
+  it('MAX_STDERR_BYTES 초과 stderr는 잘려서 에러 메시지에 포함', async () => {
+    const oversizedStderr = 'x'.repeat(MAX_STDERR_BYTES + 1000);
+    const p = Promise.all([
+      fetcher.fetch('https://example.com'),
+      new Promise<void>(resolve => setTimeout(() => {
+        mockProc.stderr.emit('data', Buffer.from(oversizedStderr));
+        mockProc.emit('close', 1);
+        resolve();
+      }, 0)),
+    ]);
+    const err = await p.catch(e => e);
+    expect(err).toBeInstanceOf(FetchFailedError);
+    // 전체 stderr가 아닌 MAX_STDERR_BYTES만큼만 에러 메시지에 포함됨
+    expect(err.message).not.toContain(oversizedStderr);
+    expect(err.message.length).toBeLessThan(oversizedStderr.length);
   });
 });
 
