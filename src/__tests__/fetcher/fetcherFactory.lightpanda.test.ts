@@ -5,7 +5,6 @@ vi.mock('node:child_process', () => ({
   execFile: (_cmd: string, _args: string[], _opts: unknown, cb: (err: Error | null) => void) => {
     cb(null); // lightpanda version 성공
   },
-  promisify: (fn: unknown) => fn,
 }));
 
 vi.mock('node:util', () => ({
