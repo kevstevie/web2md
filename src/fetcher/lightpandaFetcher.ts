@@ -59,8 +59,9 @@ export class LightpandaFetcher implements HtmlFetcher {
       proc.stderr.on('data', (chunk: Buffer) => {
         const remaining = MAX_STDERR_BYTES - errSize;
         if (remaining <= 0) return;
-        errChunks.push(chunk.subarray(0, remaining));
-        errSize += chunk.length;
+        const toStore = chunk.subarray(0, remaining);
+        errChunks.push(toStore);
+        errSize += toStore.length;
       });
 
       proc.on('close', (code) => settle(() => {
