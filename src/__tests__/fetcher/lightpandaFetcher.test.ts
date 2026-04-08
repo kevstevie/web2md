@@ -22,6 +22,8 @@ class MockProcess extends EventEmitter {
 }
 
 let mockProc: MockProcess;
+// LightpandaFetcher has no internal state — singleton is safe across tests.
+// Re-create here if stateful fields are added in the future.
 const fetcher = new LightpandaFetcher();
 
 // setTimeout(fn, 0) ensures all pending microtasks (validateUrl's async DNS resolution)

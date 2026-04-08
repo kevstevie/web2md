@@ -14,6 +14,7 @@ export class LightpandaFetcher implements HtmlFetcher {
         '--dump', 'html',
         '--strip-mode', LIGHTPANDA_STRIP_MODE,
         '--wait-until', 'domcontentloaded',
+        // 3s margin so lightpanda times out before Node kills the process; minimum 1s
         '--wait-ms', String(Math.max(TIMEOUT_MS - 3_000, 1_000)),
         url,
       ]);
@@ -32,6 +33,11 @@ export class LightpandaFetcher implements HtmlFetcher {
         fn();
       };
 
+      const settleError = (fn: () => void) => settle(() => {
+        chunks.length = 0;
+        fn();
+      });
+
       const killProc = () => {
         try {
           proc.kill('SIGKILL');
@@ -40,7 +46,7 @@ export class LightpandaFetcher implements HtmlFetcher {
         }
       };
 
-      timer = setTimeout(() => settle(() => {
+      timer = setTimeout(() => settleError(() => {
         killProc();
         reject(new FetchFailedError(url, new Error('lightpanda fetch timed out')));
       }), TIMEOUT_MS);
@@ -48,7 +54,7 @@ export class LightpandaFetcher implements HtmlFetcher {
       proc.stdout.on('data', (chunk: Buffer) => {
         totalSize += chunk.length;
         if (totalSize > MAX_BODY_SIZE_BYTES) {
-          settle(() => {
+          settleError(() => {
             killProc();
             reject(new FetchFailedError(url, new Error('Response too large')));
           });
@@ -68,12 +74,13 @@ export class LightpandaFetcher implements HtmlFetcher {
         if (code === 0) {
           resolve(Buffer.concat(chunks).toString('utf-8'));
         } else {
+          chunks.length = 0;
           const stderr = Buffer.concat(errChunks).toString('utf-8');
           reject(new FetchFailedError(url, new Error(stderr || `lightpanda exited with code ${code}`)));
         }
       }));
 
-      proc.on('error', (e) => settle(() => reject(new FetchFailedError(url, e))));
+      proc.on('error', (e) => settleError(() => reject(new FetchFailedError(url, e))));
     });
   }
 }
